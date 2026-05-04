@@ -5,7 +5,11 @@
 [![No dependencies](https://img.shields.io/badge/dependencies-none-22c55e?style=flat-square)](#)
 [![Single file](https://img.shields.io/badge/size-single%20HTML%20file-22c55e?style=flat-square)](#)
 
-**[→ Open Flowreach in your browser](https://iamsamuelpires.github.io/flowreach/flowreach.html)**
+**[→ Open Flowreach in your browser](https://iamsamuelpires.github.io/FlowReach/flowreach.html)**
+
+---
+
+![Flowreach Preview](Flowreachpreview.png)
 
 ---
 
@@ -20,6 +24,16 @@ No installation. No accounts. No servers. No fees. Open the file and go.
 You're doing B2B outreach. You buy lead lists from Outscraper's Google Maps Scraper — plumbers, electricians, dentists, landscapers, any local business niche. You call or text them from your Mac using your iPhone. You need somewhere to track who you've reached, what they said, and what comes next.
 
 That's Flowreach.
+
+---
+
+## Screenshots
+
+![Guide](Flowreachguide.png)
+
+![Prospects](Flowreachprospects.png)
+
+![Statistics](Flowreachstatistics.png)
 
 ---
 
@@ -41,7 +55,7 @@ That's Flowreach.
 
 ## Live demo
 
-**[iamsamuelpires.github.io/flowreach/flowreach.html](https://iamsamuelpires.github.io/flowreach/flowreach.html)**
+**[iamsamuelpires.github.io/FlowReach/flowreach.html](https://iamsamuelpires.github.io/FlowReach/flowreach.html)**
 
 No sign-up. Click and use. Your data stays in your own browser.
 
@@ -51,7 +65,7 @@ No sign-up. Click and use. Your data stays in your own browser.
 
 ### Option 1 — Use it online (recommended)
 
-[Open the live link](https://iamsamuelpires.github.io/flowreach/flowreach.html) and bookmark it. Done.
+[Open the live link](https://iamsamuelpires.github.io/FlowReach/flowreach.html) and bookmark it. Done.
 
 ### Option 2 — Run it locally
 
@@ -140,13 +154,17 @@ No framework. No build step. No node_modules. One file.
 ## Repo structure
 
 ```
-flowreach/
-├── flowreach.html     # The entire application
-├── README.md          # This file
-├── CHANGELOG.md       # Version history
-├── CONTRIBUTING.md    # How to contribute
-├── LICENSE            # MIT
-└── .gitignore
+FlowReach/
+├── flowreach.html       # The entire application
+├── README.md            # This file
+├── CHANGELOG.md         # Version history
+├── CONTRIBUTING.md      # How to contribute
+├── LICENSE              # MIT
+├── .gitignore
+├── Flowreachpreview.png
+├── Flowreachguide.png
+├── Flowreachprospects.png
+└── Flowreachstatistics.png
 ```
 
 ---
