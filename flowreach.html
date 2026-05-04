@@ -1,0 +1,3414 @@
+<!DOCTYPE html>
+<!-- 
+  ╔══════════════════════════════════════════════════════╗
+  ║  Flowreach — Open Source B2B Lead CRM           ║
+  ║  Built by Samuel Pires                               ║
+  ║  https://github.com/iamSamuelPires                   ║
+  ╚══════════════════════════════════════════════════════╝
+
+  Congratulations! You found this message. Most people didn't look here.
+  Drop the number 7734 at @iamsamuelpires on X — first ones to do it
+  get early access to a special tool I'm building later this year.
+  Don't share this.
+  → https://x.com/iamsamuelpires
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flowreach — B2B Lead CRM</title>
+
+<!-- Open Graph / Social preview -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://iamsamuelpires.github.io/flowreach/flowreach.html">
+<meta property="og:title" content="Flowreach — B2B Lead CRM">
+<meta property="og:description" content="Import your Outscraper Google Maps lead list and start calling and texting prospects directly from your browser. Free, open source, no install.">
+<meta property="og:image" content="https://iamsamuelpires.github.io/flowreach/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter / X card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@iamsamuelpires">
+<meta name="twitter:creator" content="@iamsamuelpires">
+<meta name="twitter:title" content="Flowreach — B2B Lead CRM">
+<meta name="twitter:description" content="Import your Outscraper Google Maps lead list and start calling and texting prospects directly from your browser. Free, open source, no install.">
+<meta name="twitter:image" content="https://iamsamuelpires.github.io/flowreach/og-image.png">
+
+<!-- SEO -->
+<meta name="description" content="Flowreach is a free, open source B2B outreach CRM for Outscraper Google Maps Scraper lists. Call and text leads directly from your browser. No install, no accounts.">
+<meta name="author" content="Samuel Pires">
+<link rel="canonical" href="https://iamsamuelpires.github.io/flowreach/flowreach.html">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════ */
+:root {
+  --g50:  #f0fdf4;
+  --g100: #dcfce7;
+  --g200: #bbf7d0;
+  --g400: #4ade80;
+  --g500: #22c55e;
+  --g600: #16a34a;
+  --g700: #15803d;
+
+  --ink:   #09090b;
+  --ink2:  #18181b;
+  --ink3:  #27272a;
+  --mid:   #3f3f46;
+  --muted: #71717a;
+  --faint: #e4e4e7;
+  --pale:  #f4f4f5;
+  --bg:    #eef7ee;
+  --card:  #ffffff;
+
+  --red:    #ef4444;
+  --amber:  #f59e0b;
+  --blue:   #3b82f6;
+  --purple: #8b5cf6;
+
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.05);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.04);
+  --shadow-lg: 0 10px 24px rgba(0,0,0,.08), 0 4px 8px rgba(0,0,0,.04);
+  --shadow-xl: 0 20px 48px rgba(0,0,0,.10), 0 8px 16px rgba(0,0,0,.05);
+
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-2xl: 24px;
+
+  --sidebar: 256px;
+  --green-glow: 0 0 0 3px rgba(34,197,94,.15);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.5;
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(ellipse 800px 600px at 70% -10%, rgba(34,197,94,.06) 0%, transparent 65%),
+    radial-gradient(ellipse 600px 400px at -5% 80%, rgba(34,197,94,.04) 0%, transparent 60%);
+  pointer-events:none;
+  z-index:0;
+}
+.shell,.content{position:relative;z-index:1;}
+.sidebar{z-index:50;}
+
+/* ═══════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════ */
+.shell{display:flex;min-height:100vh;}
+.content{margin-left:var(--sidebar);flex:1;min-width:0;}
+
+/* ═══════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════ */
+.sidebar{
+  width:var(--sidebar);
+  background:#ffffff;
+  border-right:1px solid var(--faint);
+  position:fixed;top:0;left:0;height:100vh;
+  display:flex;flex-direction:column;
+  z-index:50;
+  overflow:hidden;
+}
+
+/* ── Logo area ───────────────────────────────── */
+.sidebar-logo{
+  padding:18px 18px 16px;
+  border-bottom:1px solid var(--faint);
+  display:flex;align-items:center;gap:12px;
+  flex-shrink:0;
+}
+.logo-upload-zone{
+  width:36px;height:36px;
+  border-radius:9px;
+  flex-shrink:0;
+  cursor:pointer;
+  overflow:hidden;
+  transition:opacity .15s;
+}
+.logo-upload-zone:hover { opacity:.75; }
+.logo-upload-placeholder{
+  width:36px;height:36px;
+  border:2px dashed var(--faint);
+  border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .15s;
+  background:var(--pale);
+}
+.logo-upload-zone:hover .logo-upload-placeholder { border-color: var(--g400); }
+.logo-name{
+  font-size:14px;font-weight:700;
+  letter-spacing:-.3px;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.logo-tag{
+  font-size:10px;color:var(--muted);
+  letter-spacing:.02em;margin-top:1px;
+}
+
+/* Nav */
+.nav{padding:14px 12px 8px;flex-shrink:0;}
+.nav-label{
+  font-size:9px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);
+  padding:0 8px 6px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 10px;border-radius:var(--r-sm);
+  font-size:13px;font-weight:500;color:var(--mid);
+  cursor:pointer;transition:all .12s;
+  border:none;background:none;
+  font-family:'DM Sans',sans-serif;
+  width:100%;text-align:left;
+  margin-bottom:1px;
+}
+.nav-item:hover{background:var(--pale);color:var(--ink);}
+.nav-item.active{
+  background:var(--g50);
+  color:var(--g700);font-weight:600;
+  border-left:2px solid var(--g500);
+  padding-left:8px;
+}
+.nav-item.active .nav-icon{color:var(--g500);}
+.nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
+.nav-pill{
+  margin-left:auto;background:var(--g500);color:#fff;
+  font-size:9px;font-weight:700;padding:2px 6px;
+  border-radius:20px;
+}
+.nav-divider{height:1px;background:var(--faint);margin:6px 0;}
+
+/* Batch list */
+.batch-section{
+  padding:0 12px 4px;
+  flex:1;
+  overflow-y:auto;
+  min-height:0;
+}
+.batch-item-wrap{
+  position:relative;
+  transition:
+    opacity .2s ease,
+    transform .25s cubic-bezier(.22,.68,0,1.1);
+  border-radius:var(--r-sm);
+}
+.batch-item-wrap.is-dragging{
+  opacity:.35;
+  transform:scale(.96);
+  z-index:10;
+}
+.batch-item-wrap.drag-above{ transform:translateY(5px); }
+.batch-item-wrap.drag-below{ transform:translateY(-5px); }
+
+/* Pipeline stage rows in Settings */
+.stage-row{
+  transition:
+    opacity .2s ease,
+    transform .25s cubic-bezier(.22,.68,0,1.1);
+}
+.stage-row.is-dragging{
+  opacity:.35;
+  transform:scale(.97);
+}
+.stage-row.drag-above{ transform:translateY(5px); }
+.stage-row.drag-below{ transform:translateY(-5px); }
+.batch-item{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 10px;border-radius:var(--r-sm);
+  cursor:pointer;transition:background .12s;
+  border:none;background:none;width:100%;
+  font-family:'DM Sans',sans-serif;
+  margin-bottom:2px;
+}
+.batch-item:hover{background:var(--pale);}
+.batch-item.active-batch{background:var(--g50);}
+.batch-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--g400);flex-shrink:0;
+}
+.batch-drag-handle{
+  cursor:grab;color:var(--faint);font-size:13px;flex-shrink:0;
+  padding:0 2px;user-select:none;
+  transition:color .12s;
+}
+.batch-item:hover .batch-drag-handle{color:var(--muted);}
+.batch-name{
+  font-size:12px;font-weight:500;color:var(--mid);
+  flex:1;text-align:left;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
+  cursor:text;border-radius:4px;padding:2px 4px;margin:-2px -4px;
+  transition:background .12s;
+}
+.batch-name:hover{background:rgba(34,197,94,.08);color:var(--ink);}
+/* Compact button variant used in renderBatchList */
+.batch-name-btn{
+  flex:1;min-width:0;
+  font-size:11.5px;font-weight:500;color:var(--mid);
+  text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  background:none;border:none;cursor:pointer;
+  padding:3px 6px;border-radius:6px;
+  font-family:'DM Sans',sans-serif;
+  transition:background .12s,color .12s;
+}
+.batch-item:hover .batch-name-btn{color:var(--ink);}
+.batch-name-btn:hover{background:rgba(34,197,94,.10);color:var(--ink);}
+.active-batch .batch-name-btn{color:var(--g700);font-weight:600;}
+.batch-name-input{
+  font-size:12px;font-weight:500;color:var(--ink);
+  flex:1;border:1px solid var(--g400);border-radius:4px;
+  padding:1px 6px;font-family:'DM Sans',sans-serif;
+  background:var(--g50);outline:none;
+}
+.batch-stat{
+  font-size:10px;color:var(--muted);flex-shrink:0;
+}
+.batch-del{
+  background:none;border:none;color:var(--muted);
+  cursor:pointer;font-size:12px;padding:0 2px;
+  transition:color .12s;flex-shrink:0;line-height:1;
+}
+.batch-del:hover{color:var(--red);}
+.no-batches{
+  font-size:11.5px;color:var(--muted);
+  padding:6px 10px;font-style:italic;
+}
+
+/* Sidebar footer */
+.sidebar-footer{
+  padding:10px 16px;
+  border-top:1px solid var(--faint);
+  flex-shrink:0;
+}
+.sidebar-footer-text{
+  font-size:10px;color:var(--muted);line-height:1.7;
+}
+
+/* ═══════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════ */
+.topbar{
+  height:54px;
+  background:rgba(238,247,238,.92);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--faint);
+  padding:0 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:40;
+}
+.topbar-left{}
+.page-title{font-size:15px;font-weight:700;letter-spacing:-.2px;color:var(--ink);}
+.page-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.topbar-right{display:flex;gap:7px;align-items:center;}
+
+/* ═══════════════════════════════════════
+   VIEWS
+═══════════════════════════════════════ */
+.view{display:none;padding:32px 28px;}
+.view.active{display:block;animation:fadeIn .18s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ═══════════════════════════════════════
+   BUTTONS — iOS-style depth system
+   All buttons share: rounded corners, shadow, inner highlight, active scale
+═══════════════════════════════════════ */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 18px;font-size:13px;font-weight:600;
+  font-family:'DM Sans',sans-serif;
+  border:none;border-radius:10px;cursor:pointer;
+  transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+  white-space:nowrap;letter-spacing:-.1px;
+  position:relative;
+}
+.btn:active{transform:scale(.97);}
+
+.btn-primary{
+  background:var(--ink);
+  color:#fff;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.08) inset,
+    0 2px 6px rgba(0,0,0,.22),
+    0 1px 2px rgba(0,0,0,.14);
+}
+.btn-primary:hover{
+  background:var(--ink2);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.08) inset,
+    0 4px 12px rgba(0,0,0,.26),
+    0 1px 3px rgba(0,0,0,.16);
+}
+
+.btn-green{
+  background:var(--g500);
+  color:#fff;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.15) inset,
+    0 2px 8px rgba(34,197,94,.35),
+    0 1px 2px rgba(0,0,0,.12);
+}
+.btn-green:hover{
+  background:var(--g600);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.15) inset,
+    0 4px 14px rgba(34,197,94,.40),
+    0 1px 3px rgba(0,0,0,.14);
+}
+
+.btn-ghost{
+  background:rgba(255,255,255,.92);
+  color:var(--mid);
+  border:1px solid var(--faint);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.8) inset,
+    0 1px 4px rgba(0,0,0,.07),
+    0 1px 2px rgba(0,0,0,.04);
+}
+.btn-ghost:hover{
+  background:#fff;
+  color:var(--ink);
+  border-color:rgba(0,0,0,.14);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 2px 8px rgba(0,0,0,.10),
+    0 1px 2px rgba(0,0,0,.06);
+}
+
+.btn-sm{padding:6px 14px;font-size:12px;border-radius:9px;}
+.btn-xs{padding:4px 10px;font-size:11px;border-radius:8px;}
+
+.btn-danger{
+  background:transparent;color:var(--red);
+  border:1px solid rgba(239,68,68,.3);
+  padding:5px 10px;font-size:10.5px;border-radius:8px;
+  cursor:pointer;font-family:'DM Sans',sans-serif;
+  font-weight:600;transition:all .12s;
+  box-shadow:0 1px 3px rgba(239,68,68,.08);
+}
+.btn-danger:hover{
+  background:rgba(239,68,68,.06);
+  border-color:var(--red);
+  box-shadow:0 2px 6px rgba(239,68,68,.14);
+}
+
+/* ═══════════════════════════════════════
+   SEARCH BAR
+═══════════════════════════════════════ */
+.search-wrap{
+  background:var(--card);
+  border:1px solid var(--faint);
+  border-radius:14px;
+  padding:20px 24px;
+  margin-bottom:24px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.search-label{
+  font-size:10px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:10px;
+}
+.search-input-row{display:flex;gap:10px;}
+.search-input{
+  flex:1;padding:10px 14px;
+  background:var(--pale);
+  border:1.5px solid var(--faint);
+  border-radius:var(--r-sm);
+  font-size:13px;font-weight:500;
+  color:var(--ink);font-family:'DM Sans',sans-serif;
+  transition:all .15s;
+}
+.search-input:focus{
+  outline:none;border-color:var(--g500);
+  background:var(--card);
+  box-shadow:var(--green-glow);
+}
+.search-input::placeholder{color:var(--muted);}
+.search-result{
+  margin-top:12px;padding:14px 16px;
+  background:var(--g50);border:1px solid var(--g200);
+  border-radius:var(--r-sm);
+  display:none;
+}
+.search-result.show{display:block;}
+.search-result-name{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-.2px;}
+.search-result-meta{font-size:12px;color:var(--mid);margin-top:3px;}
+
+/* ═══════════════════════════════════════
+   UPLOAD
+═══════════════════════════════════════ */
+.upload-page{max-width:560px;margin:0 auto;}
+.upload-hero{margin-bottom:32px;}
+.upload-eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:10px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--g600);
+  background:var(--g50);border:1px solid var(--g200);
+  padding:4px 10px;border-radius:20px;margin-bottom:14px;
+}
+.upload-hero h1{
+  font-size:28px;font-weight:700;
+  letter-spacing:-.6px;line-height:1.2;
+  color:var(--ink);margin-bottom:10px;
+}
+.upload-hero h1 em{font-style:normal;color:var(--g600);}
+.upload-hero p{font-size:13.5px;color:var(--mid);line-height:1.65;}
+
+.upload-zone{
+  background:var(--card);
+  border:1.5px dashed var(--faint);
+  border-radius:14px;
+  padding:52px 40px;
+  text-align:center;cursor:pointer;
+  transition:all .2s;position:relative;overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,.04);
+}
+.upload-zone::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(34,197,94,.06) 0%,transparent 65%);
+  opacity:0;transition:opacity .3s;pointer-events:none;
+}
+.upload-zone:hover::after,.upload-zone.drag-over::after{opacity:1;}
+.upload-zone:hover,.upload-zone.drag-over{
+  border-color:var(--g400);
+  box-shadow:0 0 0 4px rgba(34,197,94,.08),0 4px 16px rgba(34,197,94,.06);
+}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{
+  width:52px;height:52px;
+  background:var(--pale);border:1px solid var(--faint);
+  border-radius:var(--r-md);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin:0 auto 16px;
+}
+.upload-title{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+.upload-sub{font-size:12px;color:var(--muted);}
+.upload-status{margin-top:14px;display:none;}
+.file-card{
+  display:flex;align-items:center;gap:12px;
+  background:var(--card);border:1px solid var(--faint);
+  border-radius:12px;padding:12px 16px;
+  margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);
+}
+.file-card-icon{
+  width:32px;height:32px;background:var(--g50);
+  border-radius:7px;border:1px solid var(--g200);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;
+}
+.file-card-name{font-weight:600;font-size:13px;}
+.file-card-meta{font-size:10px;color:var(--muted);margin-top:1px;}
+
+/* Batch name input */
+.batch-name-field{margin-bottom:12px;}
+.field-label{
+  font-size:10px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);
+  margin-bottom:6px;display:block;
+}
+.field-input{
+  width:100%;padding:10px 13px;
+  background:var(--pale);border:1.5px solid var(--faint);
+  border-radius:var(--r-sm);font-size:13.5px;font-weight:500;
+  color:var(--ink);font-family:'DM Sans',sans-serif;
+  transition:all .15s;
+}
+.field-input:focus{
+  outline:none;border-color:var(--g500);
+  background:var(--card);box-shadow:var(--green-glow);
+}
+.field-input::placeholder{color:var(--muted);}
+
+.feature-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:10px;margin-top:24px;
+}
+.feature-card{
+  background:var(--card);border:1px solid var(--faint);
+  border-radius:12px;padding:14px 16px;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);
+  border-left:3px solid var(--g400);
+}
+.feature-card-icon{font-size:16px;margin-bottom:6px;}
+.feature-card-title{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+.feature-card-text{font-size:11px;color:var(--muted);line-height:1.5;}
+
+/* ═══════════════════════════════════════
+   TEMPLATES PAGE
+═══════════════════════════════════════ */
+.templates-page{max-width:100%;}
+.templates-header{margin-bottom:24px;}
+.templates-header h2{font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:5px;}
+.templates-header p{font-size:13px;color:var(--mid);line-height:1.6;}
+
+.tmpl-tabs{
+  display:flex;gap:2px;background:var(--pale);
+  border-radius:var(--r-sm);padding:3px;
+  margin-bottom:24px;width:fit-content;
+  border:1px solid var(--faint);
+}
+.tmpl-tab{
+  padding:7px 18px;border-radius:6px;
+  font-size:12.5px;font-weight:600;color:var(--muted);
+  cursor:pointer;border:none;background:none;
+  font-family:'DM Sans',sans-serif;transition:all .12s;
+}
+.tmpl-tab.active{background:var(--card);color:var(--ink);box-shadow:var(--shadow-xs);}
+
+.tmpl-panel{display:none;}
+.tmpl-panel.active{display:block;}
+
+.template-card{
+  background:var(--card);border:1px solid var(--faint);
+  border-radius:12px;padding:20px;
+  margin-bottom:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  transition:box-shadow .15s;
+}
+.template-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.09),0 2px 4px rgba(0,0,0,.05);}
+.template-card-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.template-color-bar{
+  width:3px;height:28px;border-radius:2px;flex-shrink:0;
+}
+.template-name-input{
+  flex:1;background:var(--pale);border:1.5px solid var(--faint);
+  border-radius:var(--r-sm);padding:7px 11px;
+  font-size:13px;font-weight:600;color:var(--ink);
+  font-family:'DM Sans',sans-serif;transition:all .15s;
+}
+.template-name-input:focus{
+  outline:none;border-color:var(--g500);
+  background:var(--card);box-shadow:var(--green-glow);
+}
+.template-name-input::placeholder{color:var(--muted);font-weight:400;}
+.template-del{
+  background:none;border:none;color:var(--muted);
+  cursor:pointer;font-size:16px;padding:4px;
+  border-radius:6px;transition:all .12s;flex-shrink:0;
+}
+.template-del:hover{color:var(--red);background:rgba(239,68,68,.06);}
+.template-textarea{
+  width:100%;min-height:120px;
+  background:var(--pale);border:1.5px solid var(--faint);
+  border-radius:var(--r-sm);padding:11px 13px;
+  font-size:12.5px;line-height:1.7;color:var(--ink);
+  font-family:'DM Sans',sans-serif;resize:vertical;
+  transition:all .15s;
+}
+.template-textarea:focus{
+  outline:none;border-color:var(--g500);
+  background:var(--card);box-shadow:var(--green-glow);
+}
+.template-textarea::placeholder{color:var(--muted);}
+.template-footer{
+  display:flex;justify-content:space-between;
+  align-items:center;margin-top:8px;
+}
+.char-count{font-size:10px;color:var(--muted);}
+.placeholder-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10.5px;color:var(--mid);
+}
+.placeholder-tag code{
+  background:var(--g50);color:var(--g700);
+  border:1px solid var(--g200);padding:1px 5px;
+  border-radius:4px;font-size:10px;
+}
+
+.add-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 16px;
+  background:rgba(255,255,255,.9);
+  border:1.5px dashed var(--faint);
+  border-radius:10px;color:var(--muted);
+  font-size:13px;font-weight:500;
+  cursor:pointer;width:100%;transition:all .15s;
+  font-family:'DM Sans',sans-serif;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+.add-btn:hover{
+  border-color:var(--g400);color:var(--g600);
+  background:var(--g50);
+  box-shadow:0 2px 8px rgba(34,197,94,.12);
+}
+
+/* ═══════════════════════════════════════
+   PROSPECT LIST
+═══════════════════════════════════════ */
+.list-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;flex-wrap:wrap;gap:10px;
+}
+.list-title{font-size:17px;font-weight:700;letter-spacing:-.3px;}
+.list-meta{font-size:11.5px;color:var(--muted);margin-top:2px;}
+
+/* Toolbar */
+.prospects-toolbar{
+  display:flex;align-items:center;
+  gap:0;
+  margin-bottom:16px;
+  flex-wrap:wrap;
+  row-gap:8px;
+}
+.toolbar-divider{
+  width:1px;height:18px;
+  background:var(--faint);
+  margin:0 14px;
+  flex-shrink:0;
+}
+
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.filter-chip{
+  padding:5px 13px;border-radius:20px;
+  font-size:11.5px;font-weight:600;
+  border:1.5px solid var(--faint);
+  background:rgba(255,255,255,.85);color:var(--muted);
+  cursor:pointer;transition:all .12s;
+  font-family:'DM Sans',sans-serif;
+  box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 0 rgba(255,255,255,.7) inset;
+}
+.filter-chip:hover{
+  border-color:var(--g400);color:var(--g700);
+  background:#fff;
+  box-shadow:0 2px 6px rgba(34,197,94,.12),0 1px 0 rgba(255,255,255,.8) inset;
+}
+.filter-chip.active{
+  background:var(--ink);border-color:var(--ink);
+  color:#fff;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.08) inset,
+    0 2px 6px rgba(0,0,0,.2);
+}
+
+/* Sort bar */
+.sort-bar{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;color:var(--muted);
+}
+.sort-bar-label{
+  font-size:10px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.08em;
+  margin-right:2px;flex-shrink:0;
+}
+.sort-btn{
+  padding:4px 10px;border-radius:8px;
+  background:rgba(255,255,255,.85);
+  border:1px solid var(--faint);
+  color:var(--muted);font-size:11px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all .12s;
+  box-shadow:0 1px 2px rgba(0,0,0,.05),0 1px 0 rgba(255,255,255,.7) inset;
+}
+.sort-btn:hover{
+  border-color:var(--g400);color:var(--g600);
+  background:#fff;
+  box-shadow:0 2px 6px rgba(34,197,94,.10),0 1px 0 rgba(255,255,255,.8) inset;
+}
+.sort-btn.active-sort{
+  background:var(--g50);border-color:var(--g300);
+  color:var(--g700);font-weight:600;
+  box-shadow:0 1px 4px rgba(34,197,94,.15),0 1px 0 rgba(255,255,255,.6) inset;
+}
+
+/* Table */
+.table-wrap{
+  background:var(--card);border-radius:12px;
+  border:1px solid var(--faint);overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.04);
+  overflow-x:auto;
+}
+table{width:max-content;min-width:100%;border-collapse:collapse;font-size:12.5px;table-layout:auto;}
+thead{background:var(--pale);}
+th{
+  padding:10px 16px;text-align:left;
+  font-size:9px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);
+  border-bottom:1px solid var(--faint);
+  border-right:1px solid var(--faint);
+  white-space:nowrap;
+  min-width:90px;
+}
+th:first-child{min-width:40px;padding-left:14px;}
+th:last-child{border-right:none;}
+th.sortable{cursor:pointer;user-select:none;}
+th.sortable:hover{color:var(--ink);}
+td{
+  padding:11px 16px;border-bottom:1px solid rgba(0,0,0,.04);
+  border-right:1px solid rgba(0,0,0,.05);
+  vertical-align:middle;
+  white-space:nowrap;
+}
+td:first-child{padding-left:14px;}
+td:last-child{border-right:none;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr{transition:background .08s;}
+tbody tr:hover td{background:var(--pale);}
+.td-company{font-weight:600;font-size:13px;color:var(--ink);}
+.td-phone{
+  font-size:12px;
+  color:var(--blue);cursor:pointer;
+  display:flex;align-items:center;gap:4px;
+  text-decoration:none;transition:color .12s;
+}
+.td-phone:hover{color:var(--g600);}
+.num-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:50%;
+  font-size:9.5px;font-weight:700;
+  color:var(--muted);background:var(--pale);
+}
+
+/* Status pill */
+.status-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:20px;
+  font-size:10.5px;font-weight:600;
+  border:1.5px solid;cursor:pointer;
+  appearance:none;-webkit-appearance:none;
+  background:transparent;font-family:'DM Sans',sans-serif;
+  white-space:nowrap;
+}
+.sp-unsent   {color:var(--muted);border-color:var(--faint);background:var(--pale);}
+.sp-sent     {color:#0369a1;border-color:#bae6fd;background:#f0f9ff;}
+.sp-positive {color:var(--g700);border-color:var(--g300);background:var(--g50);}
+.sp-negative {color:#b91c1c;border-color:#fecaca;background:#fef2f2;}
+.sp-video    {color:#7c3aed;border-color:#ddd6fe;background:#f5f3ff;}
+.sp-booked   {color:#065f46;border-color:#6ee7b7;background:#ecfdf5;}
+.sp-won      {color:#065f46;border-color:#4ade80;background:#f0fdf4;font-weight:700;}
+.sp-lost     {color:#991b1b;border-color:#f87171;background:#fff1f2;}
+
+/* ═══ LEAD DETAIL PANEL ═══ */
+.lead-panel-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.35);
+  z-index:500;opacity:0;pointer-events:none;
+  transition:opacity .2s;
+}
+.lead-panel-overlay.open{opacity:1;pointer-events:all;}
+.lead-panel{
+  position:fixed;top:0;right:0;bottom:0;width:420px;
+  background:var(--card);
+  border-left:1px solid var(--faint);
+  z-index:501;
+  display:flex;flex-direction:column;
+  transform:translateX(100%);
+  transition:transform .28s cubic-bezier(.22,.68,0,1.1);
+  box-shadow:-12px 0 40px rgba(0,0,0,.10),-4px 0 12px rgba(0,0,0,.06);
+}
+.lead-panel.open{transform:translateX(0);}
+.lead-panel-header{
+  padding:20px 24px 16px;
+  border-bottom:1px solid var(--faint);
+  display:flex;align-items:flex-start;gap:12px;
+  flex-shrink:0;
+}
+.lead-panel-body{
+  flex:1;overflow-y:auto;padding:20px 24px;
+  display:flex;flex-direction:column;gap:18px;
+}
+.lead-panel-close{
+  background:none;border:none;cursor:pointer;
+  color:var(--muted);font-size:18px;padding:0 4px;
+  line-height:1;transition:color .12s;flex-shrink:0;
+}
+.lead-panel-close:hover{color:var(--ink);}
+.lead-section-label{
+  font-size:9px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);
+  margin-bottom:8px;
+}
+.lead-info-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+}
+.lead-info-item{
+  background:var(--pale);border-radius:8px;
+  padding:10px 12px;border:1px solid var(--faint);
+}
+.lead-info-label{font-size:9px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.lead-info-value{font-size:12.5px;font-weight:500;color:var(--ink);word-break:break-word;}
+.timeline-item{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:8px 0;border-bottom:1px solid rgba(0,0,0,.04);
+}
+.timeline-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--g400);flex-shrink:0;margin-top:4px;
+}
+.timeline-text{font-size:12px;color:var(--mid);line-height:1.4;}
+.timeline-time{font-size:10px;color:var(--muted);}
+
+/* ═══ COLUMN DRAG ═══
+   Uses mousedown/mousemove/mouseup (not HTML5 drag API) so columns
+   move live while dragging with no browser ghost-image flicker.
+═══════════════════════════════════════════════════════ */
+th[data-colidx]{
+  cursor:grab;
+  transition:transform .18s cubic-bezier(.25,.46,.45,.94),
+             opacity .15s ease,
+             background .12s ease;
+  user-select:none;
+}
+th[data-colidx]:active{ cursor:grabbing; }
+
+th.col-dragging{
+  opacity:.35;
+  background:var(--g50) !important;
+}
+th.col-shift-left{
+  transform:translateX(-6px);
+}
+th.col-shift-right{
+  transform:translateX(6px);
+}
+
+#col-drag-ghost{
+  position:fixed;
+  pointer-events:none;
+  z-index:9999;
+  background:var(--ink);
+  color:#fff;
+  font-size:10px;
+  font-weight:700;
+  font-family:'DM Sans',sans-serif;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  padding:6px 14px;
+  border-radius:20px;
+  box-shadow:0 4px 16px rgba(0,0,0,.18);
+  white-space:nowrap;
+  transform:translate(-50%,-140%);
+  transition:opacity .1s ease;
+  pointer-events:none;
+}
+
+/* ═══ ROW CLICKABLE ═══ */
+tbody tr{cursor:pointer;}
+tbody tr:hover td{background:var(--g50);}
+
+/* Rev badge */
+.rev-b{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:2px 8px;border-radius:20px;
+  font-size:10.5px;font-weight:600;
+}
+.rev-low {background:var(--g50);color:var(--g700);border:1px solid var(--g200);}
+.rev-mid {background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
+.rev-high{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;}
+
+.cat-pill{
+  display:inline-block;padding:2px 8px;border-radius:5px;
+  font-size:10px;font-weight:600;
+  background:var(--pale);color:var(--mid);
+  border:1px solid var(--faint);white-space:nowrap;
+}
+
+/* SMS button with dropdown */
+.sms-wrap{position:relative;}
+.sms-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;
+  background:var(--g50);color:var(--g700);
+  border:1.5px solid var(--g200);border-radius:9px;
+  font-size:10.5px;font-weight:600;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all .12s;
+  white-space:nowrap;
+  box-shadow:0 1px 3px rgba(34,197,94,.12),0 1px 0 rgba(255,255,255,.6) inset;
+}
+.sms-btn:hover{
+  background:var(--g500);color:#fff;border-color:var(--g500);
+  box-shadow:0 2px 8px rgba(34,197,94,.30),0 1px 0 rgba(255,255,255,.1) inset;
+}
+.sms-btn.copied{
+  background:var(--g500);color:#fff;border-color:var(--g500);
+  box-shadow:0 1px 4px rgba(34,197,94,.25);
+}
+.sms-dropdown{
+  position:fixed;
+  background:var(--card);border:1px solid var(--faint);
+  border-radius:var(--r-md);box-shadow:var(--shadow-xl);
+  z-index:9000;min-width:220px;overflow:hidden;display:none;
+}
+.sms-dropdown.open{display:block;}
+.sms-dd-item{
+  padding:10px 14px;font-size:12.5px;font-weight:500;
+  color:var(--ink);cursor:pointer;transition:background .1s;
+  border-bottom:1px solid rgba(0,0,0,.04);
+  font-family:'DM Sans',sans-serif;
+}
+.sms-dd-item:last-child{border-bottom:none;}
+.sms-dd-item:hover{background:var(--g50);color:var(--g700);}
+.sms-dd-empty{
+  padding:12px 14px;font-size:11.5px;
+  color:var(--muted);font-style:italic;
+}
+
+/* ═══════════════════════════════════════
+   STATS
+═══════════════════════════════════════ */
+.stats-page-header{margin-bottom:28px;}
+.stats-page-header h2{font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:4px;}
+.stats-page-header p{font-size:13px;color:var(--mid);}
+
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-bottom:24px;}
+.kpi-card{
+  background:var(--card);border:1px solid var(--faint);
+  border-radius:12px;padding:20px 18px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  position:relative;overflow:hidden;
+  transition:transform .15s,box-shadow .15s;
+}
+.kpi-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 18px rgba(0,0,0,.09),0 2px 4px rgba(0,0,0,.05);
+}
+.kpi-top-bar{
+  position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0;
+}
+.kpi-label{
+  font-size:9px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);
+  margin-bottom:8px;
+}
+.kpi-value{font-size:36px;font-weight:700;line-height:1;letter-spacing:-2px;color:var(--ink);}
+.kpi-sub{font-size:10.5px;color:var(--muted);margin-top:5px;}
+.kpi-green .kpi-value{color:var(--g600);}
+.kpi-amber .kpi-value{color:var(--amber);}
+.kpi-blue  .kpi-value{color:var(--blue);}
+.kpi-red   .kpi-value{color:var(--red);}
+
+.stats-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+
+.stats-card{
+  background:var(--card);border:1px solid var(--faint);
+  border-radius:12px;padding:22px 24px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+}
+.stats-card-title{
+  font-size:9px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);
+  margin-bottom:18px;
+}
+
+/* Horizontal bars */
+.hbar-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.hbar-row:last-child{margin-bottom:0;}
+.hbar-label{font-size:12px;font-weight:500;color:var(--mid);width:120px;flex-shrink:0;}
+.hbar-track{flex:1;height:6px;background:var(--pale);border-radius:4px;overflow:hidden;}
+.hbar-fill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.34,1.56,.64,1);}
+.hbar-val{font-size:12px;font-weight:600;color:var(--ink);width:30px;text-align:right;flex-shrink:0;}
+.hbar-pct{font-size:10px;color:var(--muted);width:34px;text-align:right;flex-shrink:0;}
+
+/* Funnel */
+.funnel-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 0;border-bottom:1px solid rgba(0,0,0,.05);
+}
+.funnel-item:last-child{border-bottom:none;}
+.funnel-label{font-size:13.5px;font-weight:600;color:var(--ink);}
+.funnel-desc{font-size:10.5px;color:var(--muted);margin-top:2px;}
+.funnel-val{
+  font-size:26px;font-weight:700;letter-spacing:-1.5px;
+}
+
+/* Manus compare */
+.manus-compare-row{
+  display:grid;
+  gap:12px;
+  margin-bottom:20px;
+}
+.manus-cmp-card{
+  background:var(--card);border:1px solid var(--faint);
+  border-radius:12px;padding:18px 20px;
+  box-shadow:0 2px 6px rgba(0,0,0,.06);
+  display:grid;grid-template-columns:1fr auto;
+  align-items:start;gap:16px;
+}
+.manus-cmp-name{font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:4px;letter-spacing:-.2px;}
+.manus-cmp-stats{display:flex;gap:20px;flex-wrap:wrap;}
+.manus-cmp-stat{text-align:center;}
+.manus-cmp-val{font-size:22px;font-weight:700;letter-spacing:-1px;}
+.manus-cmp-lbl{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+
+/* ═══════════════════════════════════════
+   PDF MODAL
+═══════════════════════════════════════ */
+.modal-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.4);
+  backdrop-filter:blur(6px);
+  z-index:300;display:none;
+  align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--card);border-radius:16px;
+  padding:28px;width:380px;max-width:95vw;
+  box-shadow:0 20px 48px rgba(0,0,0,.14),0 6px 16px rgba(0,0,0,.08);
+  border:1px solid var(--faint);
+}
+.modal h3{font-size:17px;font-weight:700;letter-spacing:-.3px;margin-bottom:5px;}
+.modal-sub{font-size:12.5px;color:var(--mid);margin-bottom:20px;line-height:1.5;}
+.modal-actions{display:flex;gap:8px;margin-top:20px;}
+.modal-actions .btn{flex:1;justify-content:center;}
+
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
+.toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--ink);color:#fff;
+  padding:10px 20px;border-radius:30px;
+  font-size:12.5px;font-weight:600;
+  z-index:9999;
+  transition:transform .28s cubic-bezier(.34,1.56,.64,1);
+  white-space:nowrap;pointer-events:none;
+  box-shadow:var(--shadow-lg);
+  font-family:'DM Sans',sans-serif;
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* Empty */
+.empty-state{
+  text-align:center;padding:64px 32px;
+  color:var(--muted);
+}
+.empty-icon{font-size:36px;margin-bottom:12px;}
+.empty-text{font-size:13px;line-height:1.7;color:var(--mid);}
+.empty-msg-row{
+  text-align:center;padding:40px;
+  color:var(--muted);font-size:12px;
+}
+
+/* Toggle switch */
+.toggle-row{display:flex;align-items:center;gap:8px;}
+.toggle-label{font-size:11px;font-weight:600;color:var(--mid);}
+.toggle-label.active-mode{color:var(--ink);}
+.toggle-switch{width:40px;height:22px;background:var(--faint);border-radius:11px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0;}
+.toggle-switch.on{background:var(--g500);}
+.toggle-knob{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle-switch.on .toggle-knob{transform:translateX(18px);}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--faint);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- LEAD DETAIL PANEL
+     DEVELOPER NOTE: Slides in from the right when a prospect row is clicked.
+     Shows full lead info, status changer, notes, call script, and activity timeline.
+     Overlay click dismisses it. Data is read from the current batch by index (gi).
+     Timeline is stored per-lead as an array of {action, ts} objects in lead.timeline[].
+-->
+<div class="lead-panel-overlay" id="lead-overlay" onclick="closeLeadPanel()"></div>
+<div class="lead-panel" id="lead-panel">
+  <div class="lead-panel-header">
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.3px;margin-bottom:2px;" id="lp-company">—</div>
+      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;" id="lp-meta">—</div>
+    </div>
+    <button class="lead-panel-close" onclick="closeLeadPanel()">✕</button>
+  </div>
+  <div class="lead-panel-body">
+
+    <!-- Status -->
+    <div>
+      <div class="lead-section-label">Status</div>
+      <select id="lp-status" class="status-pill sp-unsent" style="width:100%;padding:8px 12px;font-size:12.5px;"
+        onchange="updateLeadPanelStatus(this.value)"></select>
+    </div>
+
+    <!-- Key info grid -->
+    <div>
+      <div class="lead-section-label">Lead info</div>
+      <div class="lead-info-grid" id="lp-info-grid"></div>
+    </div>
+
+    <!-- Note -->
+    <div>
+      <div class="lead-section-label">Note</div>
+      <textarea id="lp-note" rows="3"
+        style="width:100%;background:var(--pale);border:1.5px solid var(--faint);border-radius:var(--r-sm);padding:10px 12px;font-size:12.5px;font-family:'DM Sans',sans-serif;color:var(--ink);resize:vertical;transition:border-color .15s;"
+        placeholder="Add a note about this lead..."
+        oninput="updateLeadPanelNote(this.value)"
+        onfocus="this.style.borderColor='var(--g500)'"
+        onblur="this.style.borderColor='var(--faint)'"></textarea>
+    </div>
+
+    <!-- Call script selector -->
+    <div>
+      <div class="lead-section-label">Call script used</div>
+      <select id="lp-script" style="width:100%;background:var(--pale);border:1.5px solid var(--faint);border-radius:var(--r-sm);padding:8px 12px;font-size:12.5px;font-family:'DM Sans',sans-serif;color:var(--ink);"
+        onchange="updateLeadPanelScript(this.value)">
+        <option value="-1">No script selected</option>
+      </select>
+      <div id="lp-script-preview" style="display:none;margin-top:10px;padding:12px 14px;background:var(--pale);border-radius:var(--r-sm);border:1px solid var(--faint);font-size:12px;color:var(--mid);line-height:1.6;max-height:180px;overflow-y:auto;white-space:pre-wrap;"></div>
+    </div>
+
+    <!-- Activity timeline -->
+    <div>
+      <div class="lead-section-label">Activity timeline</div>
+      <div id="lp-timeline" style="display:flex;flex-direction:column;"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;font-family:'DM Mono',monospace;">
+        Status changes and notes are logged automatically.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PDF Modal -->
+<div class="modal-overlay" id="pdf-overlay">
+  <div class="modal">
+    <h3>Export batch report</h3>
+    <p class="modal-sub">PDF with conversion data and script comparison for the active batch.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closePdf()">Cancel</button>
+      <button class="btn btn-primary" onclick="generatePDF()">📄 Generate PDF</button>
+    </div>
+  </div>
+</div>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div id="logo-display" class="logo-upload-zone" onclick="triggerLogoUpload()" title="Click to upload your logo">
+        <div class="logo-upload-placeholder">
+          <span style="font-size:15px;opacity:.3;">⊕</span>
+        </div>
+      </div>
+      <input type="file" id="logo-input" accept="image/*" style="display:none" onchange="handleLogoUpload(this)">
+      <div style="min-width:0;flex:1;">
+        <div class="logo-name">Flowreach</div>
+        <div class="logo-tag">B2B Lead CRM</div>
+      </div>
+    </div>
+
+    <!-- nav starts below logo -->
+    <nav class="nav">
+      <div class="nav-label">Search</div>
+      <div style="padding:0 2px 8px;">
+        <input
+          class="search-input"
+          type="text"
+          placeholder="Search name or number..."
+          oninput="globalSearch(this.value)"
+          style="width:100%;font-size:12px;padding:8px 11px;"
+        >
+        <div id="global-search-result" style="display:none;margin-top:6px;padding:10px 12px;background:var(--g50);border:1px solid var(--g200);border-radius:var(--r-sm);">
+          <div id="gsr-name" style="font-size:13px;font-weight:700;color:var(--ink);"></div>
+          <div id="gsr-meta" style="font-size:10.5px;color:var(--mid);font-family:'DM Mono',monospace;margin-top:2px;"></div>
+        </div>
+      </div>
+
+      <div class="nav-divider"></div>
+      <div class="nav-label">Tools</div>
+      <button class="nav-item" onclick="switchTab('upload')">
+        <span class="nav-icon">⬆</span>Import
+      </button>
+      <button class="nav-item" onclick="switchTab('lista')">
+        <span class="nav-icon">▤</span>Prospects
+        <span class="nav-pill" id="list-badge" style="display:none">0</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('statistik')">
+        <span class="nav-icon">◎</span>Statistics
+      </button>
+      <button class="nav-item active" onclick="switchTab('guide')">
+        <span class="nav-icon">◈</span>Guide
+      </button>
+      <button class="nav-item" onclick="switchTab('settings')">
+        <span class="nav-icon">⚙</span>Settings
+      </button>
+
+      <div class="nav-divider"></div>
+      <div class="nav-label">Templates</div>
+      <button class="nav-item" onclick="switchTab('mallar')">
+        <span class="nav-icon">💬</span>SMS Templates
+      </button>
+      <button class="nav-item" onclick="switchTab('scripts')">
+        <span class="nav-icon">📞</span>Call Scripts
+      </button>
+
+      <div class="nav-divider"></div>
+      <div class="nav-label">Batches</div>
+    </nav>
+
+    <!-- Scrollable batch list -->
+    <div class="batch-section">
+      <div id="batch-list">
+        <div class="no-batches">No batches yet.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div style="display:flex;gap:14px;">
+        <a href="https://x.com/iamsamuelpires" target="_blank" style="font-size:11px;font-weight:600;color:var(--muted);text-decoration:none;transition:color .12s;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--muted)'">X</a>
+        <a href="https://www.linkedin.com/in/samuel-pires-4b3073267/" target="_blank" style="font-size:11px;font-weight:600;color:var(--muted);text-decoration:none;transition:color .12s;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--muted)'">LinkedIn</a>
+        <a href="https://github.com/iamSamuelPires" target="_blank" style="font-size:11px;font-weight:600;color:var(--muted);text-decoration:none;transition:color .12s;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--muted)'">GitHub</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="page-title" id="page-title">Import</div>
+        <div class="page-sub" id="page-sub">Upload your Outscraper export file</div>
+      </div>
+      <div class="topbar-right" id="topbar-actions"></div>
+    </div>
+
+    <!-- UPLOAD VIEW -->
+    <div class="view" id="view-upload">
+      <div class="upload-page">
+        <div class="upload-hero">
+          <div class="upload-eyebrow">📱 Outscraper → Flowreach</div>
+          <h1>Import your leads,<br><em>start closing deals.</em></h1>
+          <p>Upload your prospect list from <strong>Google Maps Scraper</strong> — the service you get from <a href="https://outscraper.com" target="_blank" style="color:var(--g600);font-weight:600;">Outscraper.com</a>. Flowreach organises your leads, personalises your outreach, and tracks every interaction in one place.</p>
+        </div>
+
+        <div class="upload-zone" id="dropzone">
+          <input type="file" id="fileInput" accept=".xlsx,.csv" onchange="handleFile(this.files[0])">
+          <div class="upload-icon">📂</div>
+          <div class="upload-title">Drop your Outscraper file here</div>
+          <div class="upload-sub">or click to browse (.xlsx or .csv)</div>
+        </div>
+
+        <div class="upload-status" id="upload-status">
+          <div class="file-card">
+            <div class="file-card-icon">📄</div>
+            <div>
+              <div class="file-card-name" id="pill-name">—</div>
+              <div class="file-card-meta" id="pill-meta">—</div>
+            </div>
+          </div>
+          <div class="batch-name-field">
+            <label class="field-label">Name this batch</label>
+            <input class="field-input" type="text" id="batch-name-input" placeholder="e.g. Plumbers · London · May">
+          </div>
+          <button class="btn btn-primary" onclick="processFile()" style="width:100%;justify-content:center;padding:13px;font-size:14px;">
+            ⚡ Import batch
+          </button>
+        </div>
+
+        <!-- Social footer — Import page -->
+        <div style="text-align:center;padding:28px 0 8px;border-top:1px solid var(--faint);margin-top:24px;">
+          <p style="font-size:11.5px;color:var(--muted);margin-bottom:10px;">Built by Samuel Pires · Free & open source</p>
+          <div style="display:flex;gap:20px;justify-content:center;align-items:center;">
+            <a href="https://x.com/iamsamuelpires" target="_blank" style="font-size:11.5px;color:var(--muted);text-decoration:none;font-weight:500;transition:color .12s;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--muted)'">X</a>
+            <a href="https://www.linkedin.com/in/samuel-pires-4b3073267/" target="_blank" style="font-size:11.5px;color:var(--muted);text-decoration:none;font-weight:500;transition:color .12s;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--muted)'">LinkedIn</a>
+            <a href="https://github.com/iamSamuelPires" target="_blank" style="font-size:11.5px;color:var(--muted);text-decoration:none;font-weight:500;transition:color .12s;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--muted)'">GitHub</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SMS TEMPLATES — text message outreach -->
+    <div class="view" id="view-mallar">
+      <div class="templates-page">
+        <div class="templates-header">
+          <h2>SMS Templates</h2>
+        </div>
+
+        <!-- Placeholder info + example bubble -->
+        <div style="margin-bottom:24px;background:#fff;border:1px solid var(--faint);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+          <div style="padding:14px 18px;border-bottom:1px solid var(--faint);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Placeholders</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <code style="background:var(--g50);color:var(--g700);border:1px solid var(--g200);padding:2px 8px;border-radius:6px;font-size:11px;">(name)</code>
+              <code style="background:var(--g50);color:var(--g700);border:1px solid var(--g200);padding:2px 8px;border-radius:6px;font-size:11px;">(city)</code>
+              <code style="background:var(--g50);color:var(--g700);border:1px solid var(--g200);padding:2px 8px;border-radius:6px;font-size:11px;">(trade)</code>
+            </div>
+            <span style="font-size:11px;color:var(--muted);">auto-replaced on copy</span>
+          </div>
+          <div style="padding:14px 18px;background:var(--pale);">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Example result</div>
+            <div style="display:flex;justify-content:flex-end;">
+              <div style="max-width:72%;background:#1c8ef9;color:#fff;border-radius:18px 18px 4px 18px;padding:10px 14px;font-size:13px;line-height:1.5;box-shadow:0 2px 8px rgba(28,142,249,.25);">
+                Hi Eriksson El, I noticed there are a lot of electricians in Stockholm who lose leads from missed calls. Do you ever have that problem?
+              </div>
+            </div>
+            <div style="font-size:10px;color:var(--muted);text-align:right;margin-top:6px;">
+              (name)=Eriksson El &nbsp;·&nbsp; (city)=Stockholm &nbsp;·&nbsp; (trade)=electricians
+            </div>
+          </div>
+        </div>
+
+        <div id="sms-list"></div>
+        <button class="add-btn" id="add-sms-btn" onclick="addTemplate('sms')">
+          <span style="font-size:16px;line-height:1;">+</span> Add SMS template
+        </button>
+      </div>
+    </div>
+
+    <!-- CALL SCRIPTS — spoken cold call scripts (no auto-replace) -->
+    <div class="view" id="view-scripts">
+      <div class="templates-page">
+        <div class="templates-header">
+          <h2>Call Scripts</h2>
+          <p>Cold call opening scripts, objection handling, and talk tracks. Read these aloud and personalise verbally.</p>
+        </div>
+        <div id="manus-list"></div>
+        <button class="add-btn" id="add-manus-btn" onclick="addTemplate('manus')">
+          <span style="font-size:16px;line-height:1;">+</span> Add call script
+        </button>
+      </div>
+    </div>
+
+    <!-- SETTINGS — pipeline stages + column visibility -->
+    <div class="view" id="view-settings">
+      <div style="max-width:720px;margin:0 auto;padding:8px 0 40px;">
+        <div id="settings-content"></div>
+      </div>
+    </div>
+
+    <!-- LISTA VIEW -->
+    <div class="view" id="view-lista">
+      <div class="list-header">
+        <div>
+          <div class="list-title" id="list-title">Prospect list</div>
+          <div class="list-meta" id="list-meta">—</div>
+        </div>
+      </div>
+
+      <div class="prospects-toolbar">
+        <div class="toggle-row" style="margin-bottom:0;">
+          <span class="toggle-label" id="toggle-lbl-copy" style="color:var(--ink)">📋 Copy</span>
+          <button class="toggle-switch" id="phone-toggle" onclick="togglePhoneMode()">
+            <div class="toggle-knob"></div>
+          </button>
+          <span class="toggle-label" id="toggle-lbl-call">📞 Call</span>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <div class="filter-bar" style="margin-bottom:0;">
+          <button class="filter-chip active" onclick="filterBy('alla',this)">All</button>
+          <!-- Filter chips rendered dynamically by renderFilterChips() from pipelineStages -->
+          <span id="dynamic-filter-chips"></span>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <div class="sort-bar">
+          <span class="sort-bar-label">Sort</span>
+          <button class="sort-btn" onclick="sortBy('Company',this)">A–Z</button>
+          <button class="sort-btn" onclick="sortBy('Reviews',this)">Reviews</button>
+          <button class="sort-btn" onclick="sortBy('Rating',this)">Rating</button>
+          <button class="sort-btn" onclick="sortBy('City',this)">City</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead id="table-head">
+            <tr>
+              <th>#</th>
+              <th>Company</th>
+              <th>Phone</th>
+              <th>Category</th>
+              <th>City</th>
+              <th>Address</th>
+              <th>Rev.</th>
+              <th>Rating</th>
+              <th>Status</th>
+              <th>Outreach</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- STATISTICS VIEW -->
+    <div class="view" id="view-statistik">
+      <div class="stats-page-header">
+        <h2>Statistics</h2>
+        <p id="stats-sub">Active batch · updates in real time</p>
+      </div>
+      <div class="kpi-row" id="kpi-row"></div>
+      <div class="stats-grid-2">
+        <div class="stats-card">
+          <div class="stats-card-title">Status breakdown</div>
+          <div id="status-bars"></div>
+        </div>
+        <div class="stats-card">
+          <div class="stats-card-title">Conversion funnel</div>
+          <div id="funnel"></div>
+        </div>
+      </div>
+      <div class="stats-card" style="margin-bottom:20px;">
+        <div class="stats-card-title">SMS scripts · comparison</div>
+        <div id="manus-compare"></div>
+      </div>
+    </div>
+
+    <!-- GUIDE VIEW — updated with all current features -->
+    <div class="view active" id="view-guide">
+      <div style="max-width:680px;margin:0 auto;padding:12px 0 64px;">
+
+        <!-- Hero -->
+        <div style="padding:32px 0 36px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--g600);margin-bottom:10px;">Flowreach · Getting started</div>
+          <h1 style="font-size:28px;font-weight:800;letter-spacing:-.6px;margin-bottom:10px;line-height:1.15;color:var(--ink);">The outreach tool built for<br>Outscraper lists.</h1>
+          <p style="color:var(--muted);font-size:14px;line-height:1.75;max-width:520px;margin-bottom:20px;">Import a Google Maps lead list from Outscraper's Google Maps Scraper, and Flowreach turns it into a structured calling and texting workspace — tracked, organised, and ready to go.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <span style="padding:6px 14px;background:var(--g50);border:1px solid var(--g200);border-radius:20px;font-size:11.5px;color:var(--g700);font-weight:600;">💾 Data stays in your browser</span>
+            <span style="padding:6px 14px;background:var(--pale);border:1px solid var(--faint);border-radius:20px;font-size:11.5px;color:var(--mid);font-weight:600;">🔒 No accounts · No servers · Free</span>
+          </div>
+        </div>
+
+        <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--faint);">How it works</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:36px;">
+          <div style="background:var(--card);border:1px solid var(--faint);border-radius:16px;padding:20px 18px;">
+            <div style="font-size:22px;margin-bottom:10px;">📥</div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;">Import</div>
+            <p style="font-size:12px;color:var(--muted);line-height:1.6;margin:0;">Buy a list from Outscraper's <strong style="color:var(--mid);">Google Maps Scraper</strong> and drop the .xlsx file here.</p>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--faint);border-radius:16px;padding:20px 18px;">
+            <div style="font-size:22px;margin-bottom:10px;">📞</div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;">Call &amp; text</div>
+            <p style="font-size:12px;color:var(--muted);line-height:1.6;margin:0;">One click to call via iPhone Handoff, or copy a personalised SMS and send from your phone.</p>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--faint);border-radius:16px;padding:20px 18px;">
+            <div style="font-size:22px;margin-bottom:10px;">📊</div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;">Track</div>
+            <p style="font-size:12px;color:var(--muted);line-height:1.6;margin:0;">Update status per lead. Statistics shows reply rates, conversion and script performance.</p>
+          </div>
+        </div>
+
+        <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;padding-bottom:8px;border-bottom:1px solid var(--faint);">Calling via iPhone Handoff</div>
+        <div style="margin-bottom:36px;">
+          <p style="font-size:13.5px;color:var(--mid);line-height:1.75;margin-bottom:16px;">Switch to <strong style="color:var(--ink);">Call mode</strong> in the Prospects toolbar. Every number becomes a tap-to-call link. Your Mac triggers the call, your iPhone handles it.</p>
+          <div style="background:var(--g50);border:1px solid var(--g200);border-radius:14px;padding:18px 20px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g600);margin-bottom:12px;">Requirements</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div style="font-size:12.5px;color:var(--mid);display:flex;align-items:center;gap:8px;"><span style="color:var(--g500);font-size:14px;">✓</span>Same iCloud account</div>
+              <div style="font-size:12.5px;color:var(--mid);display:flex;align-items:center;gap:8px;"><span style="color:var(--g500);font-size:14px;">✓</span>Same Wi-Fi network</div>
+              <div style="font-size:12.5px;color:var(--mid);display:flex;align-items:center;gap:8px;"><span style="color:var(--g500);font-size:14px;">✓</span>Bluetooth on both</div>
+              <div style="font-size:12.5px;color:var(--mid);display:flex;align-items:center;gap:8px;"><span style="color:var(--g500);font-size:14px;">✓</span>Handoff enabled</div>
+            </div>
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--g200);font-size:12px;color:var(--g700);">Settings → General → AirPlay &amp; Handoff → on</div>
+          </div>
+        </div>
+
+        <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;padding-bottom:8px;border-bottom:1px solid var(--faint);">SMS outreach workflow</div>
+        <div style="margin-bottom:36px;">
+          <p style="font-size:13.5px;color:var(--mid);line-height:1.75;margin-bottom:16px;">Stay in <strong style="color:var(--ink);">Copy mode</strong> (default). Four steps, about 10 seconds per lead.</p>
+          <div style="display:flex;flex-direction:column;gap:0;">
+            <div style="display:flex;gap:16px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--faint);">
+              <div style="min-width:28px;height:28px;border-radius:50%;background:var(--pale);border:1px solid var(--faint);color:var(--mid);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;">Click the phone number</div><div style="font-size:12px;color:var(--muted);">Copies to clipboard automatically</div></div>
+            </div>
+            <div style="display:flex;gap:16px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--faint);">
+              <div style="min-width:28px;height:28px;border-radius:50%;background:var(--pale);border:1px solid var(--faint);color:var(--mid);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;">Paste into Messages on iPhone</div><div style="font-size:12px;color:var(--muted);">Via Handoff or alongside your Mac</div></div>
+            </div>
+            <div style="display:flex;gap:16px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--faint);">
+              <div style="min-width:28px;height:28px;border-radius:50%;background:var(--pale);border:1px solid var(--faint);color:var(--mid);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;">Click 💬 Copy on the same row</div><div style="font-size:12px;color:var(--muted);">Your SMS with (name), (city), (trade) filled in — ready to paste</div></div>
+            </div>
+            <div style="display:flex;gap:16px;align-items:flex-start;padding:14px 0;">
+              <div style="min-width:28px;height:28px;border-radius:50%;background:var(--g50);border:1px solid var(--g200);color:var(--g600);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+              <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;">Paste and send</div><div style="font-size:12px;color:var(--muted);">Update the status in Flowreach and go to the next lead</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;padding-bottom:8px;border-bottom:1px solid var(--faint);">Getting started — 5 steps</div>
+        <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:36px;">
+          <div style="display:flex;gap:16px;align-items:flex-start;">
+            <div style="min-width:32px;height:32px;border-radius:10px;background:var(--g100);color:var(--g700);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+            <div style="padding-top:5px;"><div style="font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:4px;">Buy a list from Outscraper</div><p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin:0;">Go to <a href="https://outscraper.com" target="_blank" style="color:var(--g600);font-weight:600;">outscraper.com</a> → Google Maps Scraper. Search your niche and city (e.g. "plumbers Stockholm"), export as <strong>.xlsx</strong>.</p></div>
+          </div>
+          <div style="display:flex;gap:16px;align-items:flex-start;">
+            <div style="min-width:32px;height:32px;border-radius:10px;background:var(--g100);color:var(--g700);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+            <div style="padding-top:5px;"><div style="font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:4px;">Import into Flowreach</div><p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin:0;">Click <strong>Import</strong> in the sidebar. Drop the file, name the batch, click Import. Rows without phone numbers are filtered automatically.</p></div>
+          </div>
+          <div style="display:flex;gap:16px;align-items:flex-start;">
+            <div style="min-width:32px;height:32px;border-radius:10px;background:var(--g100);color:var(--g700);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+            <div style="padding-top:5px;"><div style="font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:4px;">Write your SMS templates</div><p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin:0;">Go to <strong>SMS Templates</strong>. Use <code style="background:var(--pale);padding:1px 5px;border-radius:4px;font-size:11px;">(name)</code> <code style="background:var(--pale);padding:1px 5px;border-radius:4px;font-size:11px;">(city)</code> <code style="background:var(--pale);padding:1px 5px;border-radius:4px;font-size:11px;">(trade)</code> — filled automatically on copy.</p></div>
+          </div>
+          <div style="display:flex;gap:16px;align-items:flex-start;">
+            <div style="min-width:32px;height:32px;border-radius:10px;background:var(--g100);color:var(--g700);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+            <div style="padding-top:5px;"><div style="font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:4px;">Work the list</div><p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin:0;">Open <strong>Prospects</strong>. Call or text each lead. Click any row for full details, notes, and activity timeline. Update status as you go.</p></div>
+          </div>
+          <div style="display:flex;gap:16px;align-items:flex-start;">
+            <div style="min-width:32px;height:32px;border-radius:10px;background:var(--g100);color:var(--g700);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div>
+            <div style="padding-top:5px;"><div style="font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:4px;">Review results</div><p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin:0;">Go to <strong>Statistics</strong> for reply rates, meeting rates, and script comparison. Export to Excel or PDF from the Prospects toolbar.</p></div>
+          </div>
+        </div>
+
+        <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;padding-bottom:8px;border-bottom:1px solid var(--faint);">Tips</div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:36px;">
+          <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--g500);font-size:14px;font-weight:700;flex-shrink:0;margin-top:1px;">→</span><p style="font-size:13px;color:var(--mid);line-height:1.6;margin:0;"><strong style="color:var(--ink);">Batches</strong> — drag to reorder in the sidebar. Click ✎ to rename. Each batch has its own pipeline and statistics.</p></div>
+          <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--g500);font-size:14px;font-weight:700;flex-shrink:0;margin-top:1px;">→</span><p style="font-size:13px;color:var(--mid);line-height:1.6;margin:0;"><strong style="color:var(--ink);">Search</strong> — the sidebar search finds any lead by name or number across all batches instantly.</p></div>
+          <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--g500);font-size:14px;font-weight:700;flex-shrink:0;margin-top:1px;">→</span><p style="font-size:13px;color:var(--mid);line-height:1.6;margin:0;"><strong style="color:var(--ink);">Pipeline stages</strong> — customise in Settings. Add stages, rename them, assign colours. Filter chips update automatically.</p></div>
+          <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--g500);font-size:14px;font-weight:700;flex-shrink:0;margin-top:1px;">→</span><p style="font-size:13px;color:var(--mid);line-height:1.6;margin:0;"><strong style="color:var(--ink);">Data safety</strong> — everything lives in your browser. Bookmark this page and export to Excel regularly as a backup.</p></div>
+          <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:var(--g500);font-size:14px;font-weight:700;flex-shrink:0;margin-top:1px;">→</span><p style="font-size:13px;color:var(--mid);line-height:1.6;margin:0;"><strong style="color:var(--ink);">Columns</strong> — drag headers to reorder. Hide columns you don't use in Settings → Column visibility.</p></div>
+        </div>
+
+        <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--faint);">Is Flowreach safe to use?</div>
+        <div style="margin-bottom:40px;">
+          <p style="font-size:13.5px;color:var(--mid);line-height:1.75;margin:0;">Yes. Flowreach is a single HTML file that runs entirely in your browser. No servers, no cloud storage, no analytics, nothing leaves your device. Source code is fully open on <a href="https://github.com/iamSamuelPires" target="_blank" style="color:var(--g600);font-weight:600;">GitHub</a> for anyone to verify.</p>
+        </div>
+
+        <div style="padding:28px 0;border-top:1px solid var(--faint);">
+          <div style="font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:6px;">Questions about Flowreach?</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:18px;">Built by Samuel Pires. Reach out on X or LinkedIn — I respond directly to every message.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <a href="https://x.com/iamsamuelpires" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:9px 20px;background:var(--ink);border-radius:10px;font-size:12.5px;font-weight:600;color:#fff;text-decoration:none;">𝕏 @iamsamuelpires</a>
+            <a href="https://www.linkedin.com/in/samuel-pires-4b3073267/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:9px 20px;background:var(--card);border:1px solid var(--faint);border-radius:10px;font-size:12.5px;font-weight:600;color:var(--ink);text-decoration:none;">LinkedIn</a>
+            <a href="https://github.com/iamSamuelPires" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:9px 20px;background:var(--card);border:1px solid var(--faint);border-radius:10px;font-size:12.5px;font-weight:600;color:var(--ink);text-decoration:none;">GitHub</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// PERSISTENCE
+// ════════════════════════════════════════
+const LS = {
+  get: k => { try { return JSON.parse(localStorage.getItem('fr_'+k)); } catch(e) { return null; } },
+  set: (k,v) => { try { localStorage.setItem('fr_'+k, JSON.stringify(v)); } catch(e) {} }
+};
+
+let batches    = LS.get('batches')    || [];
+let smsTmpls   = LS.get('smsTmpls')   || [];
+let manusTmpls = LS.get('manusTmpls') || [];
+let activeBatchId = LS.get('activeBatchId') || null;
+let currentFilter = 'alla';
+let sortCol = '', sortAsc = true;
+let rawFile = null;
+
+// ── Pipeline stages (fully user-configurable) ───────────────────────────────
+// DEVELOPER NOTE: These are the CRM pipeline stages. Users can add/edit/delete
+// in the Settings panel. The internal keys (like 'Ej skickat') are kept for
+// backwards compatibility with existing saved batches — display labels come
+// from pipelineStages[].label. New custom stages use their label as key too.
+const DEFAULT_STAGES = [
+  { key: 'new',       label: 'New',            color: '#d4d4d8' },
+  { key: 'contacted', label: 'Contacted',       color: '#7dd3fc' },
+  { key: 'positive',  label: 'Positive reply',  color: '#86efac' },
+  { key: 'negative',  label: 'No interest',     color: '#fca5a5' },
+  { key: 'video',     label: 'Video sent',      color: '#c4b5fd' },
+  { key: 'meeting',   label: 'Meeting booked',  color: '#6ee7b7' },
+  { key: 'won',       label: 'Won',             color: '#4ade80' },
+  { key: 'lost',      label: 'Lost',            color: '#f87171' },
+];
+let pipelineStages = LS.get('pipelineStages') || DEFAULT_STAGES;
+
+// Legacy status key migration — map old Swedish keys to new keys
+const LEGACY_MAP = {
+  'Ej skickat': 'new', 'Skickat': 'contacted',
+  'Svarade positivt': 'positive', 'Svarade negativt': 'negative',
+  'Video skickad': 'video', 'Möte bokat': 'meeting'
+};
+function migrateStatus(s) { return LEGACY_MAP[s] || s; }
+
+function stageByKey(k) {
+  return pipelineStages.find(s => s.key === k) || { key: k, label: k, color: '#d4d4d8' };
+}
+
+// ── Column definitions (controls table + Excel export) ──────────────────────
+// DEVELOPER NOTE: Add new importable fields here. The 'src' array lists which
+// Outscraper raw column names map to this field (first match wins).
+// visible:true = shown by default. Users toggle in Settings panel.
+const COLUMN_DEFS = [
+  { key:'Company',  label:'Company',  src:['name'],                              visible:true,  width:28 },
+  { key:'Phone',    label:'Phone',    src:['phone'],                             visible:true,  width:18 },
+  { key:'Category', label:'Category', src:['subtypes','category','type'],        visible:true,  width:18 },
+  { key:'City',     label:'City',     src:['city'],                              visible:true,  width:14 },
+  { key:'Address',  label:'Address',  src:['address','street'],                  visible:true,  width:30 },
+  { key:'Rating',   label:'Rating',   src:['rating'],                            visible:true,  width:10 },
+  { key:'Reviews',  label:'Reviews',  src:['reviews'],                           visible:true,  width:10 },
+];
+
+// Load column visibility from localStorage (user preferences)
+let colVisibility = LS.get('colVisibility') || {};
+COLUMN_DEFS.forEach(c => {
+  if(colVisibility[c.key] === undefined) colVisibility[c.key] = c.visible;
+});
+function saveColVisibility() { LS.set('colVisibility', colVisibility); }
+function isColVisible(key) { return colVisibility[key] !== false; }
+
+let phoneMode = 'copy'; // 'copy' or 'call'
+
+function togglePhoneMode() {
+  phoneMode = phoneMode === 'copy' ? 'call' : 'copy';
+  const tog = document.getElementById('phone-toggle');
+  const lblCopy = document.getElementById('toggle-lbl-copy');
+  const lblCall = document.getElementById('toggle-lbl-call');
+  if(phoneMode === 'call') {
+    tog.classList.add('on');
+    lblCopy.style.color = 'var(--muted)';
+    lblCall.style.color = 'var(--ink)';
+  } else {
+    tog.classList.remove('on');
+    lblCopy.style.color = 'var(--ink)';
+    lblCall.style.color = 'var(--muted)';
+  }
+  renderTable();
+}
+
+// ── Status helpers — read from pipelineStages dynamically ───────────────────
+// DEVELOPER NOTE: The old hardcoded STATUS_OPTIONS/LABELS/CLASS/COLORS are
+// replaced by these functions. Everything reads from pipelineStages[] so
+// custom stages work everywhere automatically.
+// Backwards compat: old saved data may have Swedish keys — migrateStatus() fixes on load.
+function getStageKeys()   { return pipelineStages.map(s => s.key); }
+function getStageLabel(k) { return stageByKey(k).label; }
+function getStageColor(k) { return stageByKey(k).color; }
+// getStageStyle — returns inline style object for status pill using actual stage color
+// Converts hex color to a readable tinted pill (light bg, darker text/border)
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return {r,g,b};
+}
+function getStageStyle(k) {
+  const s = stageByKey(k);
+  const hex = s.color || '#a1a1aa';
+  const {r,g,b} = hexToRgb(hex.length===7?hex:'#a1a1aa');
+  return `color:rgb(${Math.round(r*.55)},${Math.round(g*.55)},${Math.round(b*.55)});border-color:rgba(${r},${g},${b},.45);background:rgba(${r},${g},${b},.1);`;
+}
+// getStageClass kept for any legacy references — returns empty string now
+function getStageClass(k) { return ''; }
+const TMPL_COLORS = ['#22c55e','#3b82f6','#f59e0b','#8b5cf6','#ef4444'];
+const PAGE_META = {
+  upload:    {title:'Import',      sub:'Upload your prospect list'},
+  mallar:    {title:'SMS Templates', sub:'Text message outreach templates'},
+  scripts:   {title:'Call Scripts',  sub:'Cold call scripts & talk tracks'},
+  lista:     {title:'Prospects',   sub:''},
+  statistik: {title:'Statistics',  sub:'Active batch'},
+  settings:  {title:'Settings',   sub:'Pipeline stages & column visibility'},
+  guide:     {title:'Guide',       sub:'How Flowreach works'}
+};
+
+// ════════════════════════════════════════
+// LOGO UPLOAD
+// ════════════════════════════════════════
+function triggerLogoUpload() {
+  document.getElementById('logo-input').click();
+}
+function handleLogoUpload(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    LS.set('userLogo', dataUrl);
+    renderLogo(dataUrl);
+  };
+  reader.readAsDataURL(file);
+}
+function renderLogo(dataUrl) {
+  const display = document.getElementById('logo-display');
+  if(!display) return;
+  if(dataUrl) {
+    display.innerHTML = `<img src="${dataUrl}" style="width:36px;height:36px;object-fit:contain;border-radius:8px;display:block;" alt="Logo">`;
+  } else {
+    display.innerHTML = `<div class="logo-upload-placeholder"><span style="font-size:15px;opacity:.3;">⊕</span></div>`;
+  }
+}
+
+function updateListTitle() {
+  const b = getActiveBatch();
+  const titleEl = document.getElementById('list-title');
+  const metaEl  = document.getElementById('list-meta');
+  if(!titleEl) return;
+  if(b) {
+    titleEl.textContent = b.name;
+    if(metaEl) metaEl.textContent = `${b.data.length} prospects · ${new Date(b.id).toLocaleDateString('en-GB')}`;
+  } else {
+    titleEl.textContent = 'Prospect list';
+    if(metaEl) metaEl.textContent = '—';
+  }
+}
+
+function save() {
+  LS.set('batches', batches);
+  LS.set('smsTmpls', smsTmpls);
+  LS.set('manusTmpls', manusTmpls);
+  LS.set('activeBatchId', activeBatchId);
+  LS.set('pipelineStages', pipelineStages);
+  LS.set('colVisibility', colVisibility);
+}
+
+function getActiveBatch() {
+  return batches.find(b => b.id === activeBatchId) || null;
+}
+function getActiveData() {
+  const b = getActiveBatch();
+  return b ? b.data : [];
+}
+
+// ════════════════════════════════════════
+// UPLOAD
+// ════════════════════════════════════════
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); });
+
+function handleFile(f) {
+  if(!f) return; rawFile = f;
+  document.getElementById('upload-status').style.display = 'block';
+  document.getElementById('pill-name').textContent = f.name;
+  document.getElementById('pill-meta').textContent = (f.size/1024).toFixed(1)+' KB';
+  // Auto-suggest batch name from filename
+  const suggested = f.name.replace(/\.(xlsx|csv)$/i,'').replace(/_/g,' ');
+  if(!document.getElementById('batch-name-input').value) {
+    document.getElementById('batch-name-input').value = suggested;
+  }
+}
+
+function extractField(row, srcKeys) {
+  for(const k of srcKeys) {
+    const v = row[k];
+    if(v !== undefined && v !== null && v !== '') return v;
+  }
+  return '';
+}
+
+function parseWorkingHours(raw) {
+  if(!raw) return '';
+  try {
+    const obj = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if(typeof obj !== 'object') return String(raw);
+    const days = { måndag:'Mon',tisdag:'Tue',onsdag:'Wed',torsdag:'Thu',fredag:'Fri',lördag:'Sat',söndag:'Sun',
+                   monday:'Mon',tuesday:'Tue',wednesday:'Wed',thursday:'Thu',friday:'Fri',saturday:'Sat',sunday:'Sun' };
+    return Object.entries(obj).map(([day, hours]) => {
+      const d = days[day.toLowerCase()] || day.slice(0,3);
+      const h = Array.isArray(hours) ? hours.join(', ') : hours;
+      return `${d} ${h}`;
+    }).join(' | ');
+  } catch(e) { return String(raw).slice(0,60); }
+}
+
+function processFile() {
+  if(!rawFile) return;
+  const batchName = document.getElementById('batch-name-input').value.trim()
+    || 'Batch ' + new Date().toLocaleDateString('en-GB');
+  const r = new FileReader();
+  r.onload = e => {
+    const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:''});
+
+    const defaultStage = (pipelineStages.find(s=>s.key==='new') || pipelineStages[0])?.key || 'new';
+
+    const data = rows.map(row => {
+      const prospect = { Status: defaultStage, SmsIdx: -1, ManusIdx: -1, Note: '' };
+      // Map each column def
+      COLUMN_DEFS.forEach(col => {
+        prospect[col.key] = extractField(row, col.src);
+      });
+      // Post-process working hours
+      if(prospect.WorkingHours) {
+        prospect.WorkingHours = parseWorkingHours(prospect.WorkingHours);
+      }
+      // Ensure phone is string
+      prospect.Phone = String(prospect.Phone || '').trim();
+      return prospect;
+    }).filter(r => r.Phone !== '');
+
+    // Sort: mobile-like numbers first, then by reviews ascending
+    data.sort((a,b) => {
+      const aMob = isMobile(a.Phone) ? 0 : 1;
+      const bMob = isMobile(b.Phone) ? 0 : 1;
+      if(aMob !== bMob) return aMob - bMob;
+      const ar = parseFloat(a.Reviews), br = parseFloat(b.Reviews);
+      if(isNaN(ar)&&isNaN(br)) return 0;
+      if(isNaN(ar)) return 1; if(isNaN(br)) return -1;
+      return ar - br;
+    });
+
+    const mob = data.filter(r => isMobile(r.Phone)).length;
+
+    const batch = {
+      id: Date.now(),
+      name: batchName,
+      date: new Date().toLocaleDateString('en-GB'),
+      data
+    };
+
+    batches.push(batch);
+    activeBatchId = batch.id;
+    save();
+
+    PAGE_META.lista.sub = `${data.length} leads · ${mob} mobile`;
+    document.getElementById('list-badge').textContent = data.length;
+    document.getElementById('list-badge').style.display = '';
+
+    renderBatchList();
+    switchTab('lista');
+    renderTable();
+    renderStats();
+    updateListTitle();
+    showToast(`✓ ${data.length} prospects imported · ${mob} mobile numbers`);
+  };
+  r.readAsArrayBuffer(rawFile);
+}
+
+function isMobile(num) {
+  const n = String(num||'').replace(/\s/g,'');
+  return /^\+467\d|^07\d/.test(n);
+}
+
+// ════════════════════════════════════════
+// GLOBAL NUMBER SEARCH
+// ════════════════════════════════════════
+function globalSearch(query) {
+  const q = query.trim().toLowerCase();
+  const resultEl = document.getElementById('global-search-result');
+  if(q.length < 2) { resultEl.style.display='none'; return; }
+
+  for(const batch of batches) {
+    const byPhone = batch.data.find(r => (getField(r,'Phone')||'').replace(/\s/g,'').toLowerCase().includes(q.replace(/\s/g,'')));
+    const byName  = batch.data.find(r => {
+      const co = getField(r,'Company')||'';
+      return co.toLowerCase().includes(q) || regexShortName(co).toLowerCase().includes(q) || (_nameCache[co]||'').toLowerCase().includes(q);
+    });
+    const found = byPhone || byName;
+    if(found) {
+      const co = getField(found,'Company')||'';
+      document.getElementById('gsr-name').textContent = regexShortName(co)||co;
+      document.getElementById('gsr-meta').textContent = `${batch.name} · ${getField(found,'City')||''} · ${getStageLabel(migrateStatus(found.Status))}`;
+      resultEl.style.display = 'block';
+      return;
+    }
+  }
+  document.getElementById('gsr-name').textContent = 'No match found';
+  document.getElementById('gsr-meta').textContent = 'Not found in any batch';
+  resultEl.style.display = 'block';
+}
+
+// ════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const viewEl = document.getElementById('view-'+tab);
+  if(viewEl) viewEl.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+tab+"'")) n.classList.add('active');
+  });
+  document.getElementById('page-title').textContent = PAGE_META[tab]?.title||'';
+  document.getElementById('page-sub').textContent = PAGE_META[tab]?.sub||'';
+
+  const acts = document.getElementById('topbar-actions');
+  if(tab==='lista') {
+    acts.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="exportExcel()">↓ Excel</button><button class="btn btn-ghost btn-sm" onclick="openPdf()">📊 PDF</button><button class="btn btn-ghost btn-sm" onclick="switchTab('settings')" title="Column visibility & pipeline">⚙ Settings</button>`;
+    renderFilterChips();
+    setTimeout(renderTable, 0);
+  } else if(tab==='statistik') {
+    acts.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="switchTab('lista')">← Prospects</button>`;
+    setTimeout(renderStats, 0);
+  } else if(tab==='mallar') {
+    acts.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="switchTab('lista')">← Back</button>`;
+    renderSmsTemplates();
+  } else if(tab==='scripts') {
+    acts.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="switchTab('lista')">← Back</button>`;
+    renderScriptTemplates();
+  } else if(tab==='settings') {
+    acts.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="switchTab('lista')">← Back</button>`;
+    renderSettings();
+  } else if(tab==='guide') {
+    acts.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="switchTab('upload')">← Import</button>`;
+  } else { acts.innerHTML=''; }
+}
+
+function switchTmpl(tab, btn) {
+  document.querySelectorAll('.tmpl-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tmpl-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tmpl-'+tab).classList.add('active');
+}
+
+// ════════════════════════════════════════
+// TEMPLATES — SMS and Call Scripts are separate pages
+// DEVELOPER NOTE: SMS templates = text message outreach (uses [name][city][trade] placeholders)
+// Call Scripts = spoken cold call scripts (longer form, no auto-replace needed)
+// Both stored in localStorage. smsTmpls[] and manusTmpls[] respectively.
+// ════════════════════════════════════════
+function renderTemplates() {
+  renderSmsTemplates();
+  renderScriptTemplates();
+}
+function renderSmsTemplates()    { renderTmplList('sms',   smsTmpls,   'sms-list',   'add-sms-btn'); }
+function renderScriptTemplates() { renderTmplList('manus', manusTmpls, 'manus-list', 'add-manus-btn'); }
+
+// ════════════════════════════════════════
+// SETTINGS — pipeline stages + column visibility
+// DEVELOPER NOTE: Settings renders two panels:
+//   1. Pipeline stages — user can add/edit/delete/reorder CRM stages
+//   2. Column visibility — user toggles which columns show in the prospects table
+// Both are saved to localStorage and take effect immediately.
+// ════════════════════════════════════════
+function renderSettings() {
+  const el = document.getElementById('settings-content');
+  if(!el) return;
+
+  // Pipeline stages panel
+  const stagesHtml = `
+    <div class="stats-card" style="margin-bottom:20px;">
+      <div class="stats-card-title">Pipeline stages
+        <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:8px;">Drag to reorder · Click label to rename · Click color swatch to change color</span>
+      </div>
+      <div id="stages-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">
+        ${pipelineStages.map((s,i) => `
+          <div class="stage-row" data-idx="${i}"
+            style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border-radius:10px;border:1px solid var(--faint);box-shadow:0 1px 4px rgba(0,0,0,.06),0 1px 0 rgba(255,255,255,.8) inset;">
+            <span
+              onmousedown="stageHandleMouseDown(event,${i})"
+              style="cursor:grab;color:var(--muted);font-size:13px;user-select:none;flex-shrink:0;"
+              title="Drag to reorder">⋮⋮</span>
+            <div style="position:relative;flex-shrink:0;" title="Click to change color">
+              <div id="swatch-${i}"
+                style="width:24px;height:24px;border-radius:50%;background:${s.color};border:2px solid rgba(0,0,0,.12);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.18);"
+                onclick="document.getElementById('cpicker-${i}').click()"></div>
+              <input type="color" id="cpicker-${i}" value="${s.color}"
+                style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;"
+                oninput="liveStageColor(${i},this.value)"
+                onchange="finaliseStageColor(${i},this.value)">
+            </div>
+            <input type="text" value="${esc(s.label)}" onchange="updateStageLabel(${i},this.value)"
+              style="flex:1;border:none;background:transparent;font-size:13px;font-weight:500;color:var(--ink);outline:none;"
+              onblur="save();renderFilterChips();">
+            <button onclick="deleteStage(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:2px 4px;border-radius:6px;transition:color .12s;" title="Delete stage"
+              onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">✕</button>
+          </div>`).join('')}
+      </div>
+      <button class="add-btn" onclick="addStage()" style="width:100%;">+ Add stage</button>
+    </div>`;
+
+  // Column visibility panel — depth cards
+  const colsHtml = `
+    <div class="stats-card">
+      <div class="stats-card-title">Column visibility
+        <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:8px;">Choose which columns appear in the prospects table</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
+        ${COLUMN_DEFS.map(c => {
+          const on = isColVisible(c.key);
+          return `<label style="display:flex;align-items:center;gap:12px;padding:12px 16px;
+            background:${on?'#fff':'var(--pale)'};
+            border-radius:10px;
+            border:1.5px solid ${on?'var(--g300)':'var(--faint)'};
+            cursor:pointer;
+            box-shadow:${on
+              ? '0 2px 8px rgba(34,197,94,.12),0 1px 3px rgba(0,0,0,.06),0 1px 0 rgba(255,255,255,.9) inset'
+              : '0 1px 3px rgba(0,0,0,.05)'};
+            transition:all .15s;">
+            <input type="checkbox" ${on?'checked':''} onchange="toggleColumn('${c.key}',this.checked)"
+              style="width:16px;height:16px;accent-color:var(--g500);cursor:pointer;flex-shrink:0;">
+            <div>
+              <div style="font-size:13px;font-weight:${on?'600':'500'};color:${on?'var(--ink)':'var(--mid)'};">${c.label}</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:1px;">${c.src[0]}</div>
+            </div>
+          </label>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+  el.innerHTML = stagesHtml + colsHtml;
+
+  // Wire up the stage drag engine after DOM is updated
+  setTimeout(initStageDrag, 0);
+}
+
+function updateStageLabel(i, val) {
+  if(pipelineStages[i]) { pipelineStages[i].label = val.trim()||pipelineStages[i].label; }
+  LS.set('pipelineStages', pipelineStages);
+}
+function updateStageColor(i, val) {
+  if(pipelineStages[i]) { pipelineStages[i].color = val; }
+  LS.set('pipelineStages', pipelineStages);
+  renderSettings();
+}
+// liveStageColor — called on native picker oninput for live preview
+function liveStageColor(i, hex) {
+  const swatch = document.getElementById('swatch-' + i);
+  if(swatch) swatch.style.background = hex;
+  if(pipelineStages[i]) pipelineStages[i].color = hex;
+  LS.set('pipelineStages', pipelineStages);
+  renderFilterChips();
+}
+// finaliseStageColor — on picker change (mouseup), save and re-render
+function finaliseStageColor(i, hex) {
+  if(pipelineStages[i]) pipelineStages[i].color = hex;
+  LS.set('pipelineStages', pipelineStages);
+  renderSettings();
+  renderFilterChips();
+}
+function deleteStage(i) {
+  if(pipelineStages.length <= 2) { showToast('Need at least 2 stages'); return; }
+  if(!confirm(`Delete stage "${pipelineStages[i].label}"? Leads in this stage will stay but the stage won't appear.`)) return;
+  pipelineStages.splice(i, 1);
+  LS.set('pipelineStages', pipelineStages);
+  renderSettings(); renderFilterChips();
+}
+function addStage() {
+  const label = prompt('Stage name (e.g. "Proposal sent"):');
+  if(!label||!label.trim()) return;
+  pipelineStages.push({ key: label.trim().toLowerCase().replace(/\s+/g,'_'), label: label.trim(), color: '#a5b4fc' });
+  LS.set('pipelineStages', pipelineStages);
+  renderSettings(); renderFilterChips();
+  showToast(`✓ "${label.trim()}" added`);
+}
+function toggleColumn(key, visible) {
+  colVisibility[key] = visible;
+  saveColVisibility();
+  if(document.getElementById('view-lista')?.classList.contains('active')) renderTable();
+}
+
+function renderTmplList(type, list, listId, btnId) {
+  const el = document.getElementById(listId);
+  const btn = document.getElementById(btnId);
+  const MAX = 5;
+  el.innerHTML = list.map((t,i) => `
+    <div class="template-card">
+      <div class="template-card-header">
+        <div class="template-color-bar" style="background:${TMPL_COLORS[i%TMPL_COLORS.length]}"></div>
+        <input class="template-name-input" type="text" value="${esc(t.name)}"
+          placeholder="${type==='sms'?'Name this SMS template...':'Name this script...'}"
+          oninput="updateTmplName('${type}',${i},this.value)">
+        <button class="template-del" onclick="deleteTmpl('${type}',${i})">✕</button>
+      </div>
+      <div class="field-label">${type==='sms'?'Message text':'Script text'}</div>
+      <textarea class="template-textarea"
+        placeholder="${type==='sms'?'Write your SMS here. Use (name), (city), (trade) as placeholders.':'Write your call script here.'}"
+        oninput="updateTmplText('${type}',${i},this.value)">${esc(t.text)}</textarea>
+      <div class="template-footer">
+        <span class="char-count">${t.text.length} chars</span>
+        ${type==='sms'?'<span class="placeholder-tag">Placeholders: <code>(name)</code> · <code>(city)</code> · <code>(trade)</code></span>':''}
+      </div>
+    </div>`).join('');
+  btn.style.display = list.length >= MAX ? 'none' : 'flex';
+}
+
+function addTemplate(type) {
+  const list = type==='sms' ? smsTmpls : manusTmpls;
+  if(list.length>=5) return;
+  list.push({name:'',text:''});
+  save(); renderTemplates(); updatePanelOptions();
+}
+function deleteTmpl(type,i) {
+  if(type==='sms') smsTmpls.splice(i,1); else manusTmpls.splice(i,1);
+  save(); renderTemplates(); updatePanelOptions();
+}
+function updateTmplName(type,i,v) {
+  if(type==='sms') smsTmpls[i].name=v; else manusTmpls[i].name=v;
+  save(); updatePanelOptions();
+}
+function updateTmplText(type,i,v) {
+  if(type==='sms') smsTmpls[i].text=v; else manusTmpls[i].text=v;
+  save();
+}
+function updatePanelOptions() {
+  // Refresh table dropdowns
+  if(getActiveData().length) renderTable();
+}
+
+// ════════════════════════════════════════
+// FILTER + SORT
+// ════════════════════════════════════════
+// ── Dynamic filter chips ─────────────────────────────────────────────────────
+// DEVELOPER NOTE: Filter chips are rendered dynamically from pipelineStages[].
+// This means adding a custom stage automatically adds a filter chip.
+function renderFilterChips() {
+  const el = document.getElementById('dynamic-filter-chips');
+  if(!el) return;
+  el.innerHTML = pipelineStages.map(s =>
+    `<button class="filter-chip${currentFilter===s.key?' active':''}" onclick="filterBy('${s.key}',this)">${s.label}</button>`
+  ).join('');
+}
+
+function filterBy(s, btn) {
+  currentFilter = s;
+  document.querySelectorAll('.filter-chip').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else {
+    const all = document.querySelectorAll('.filter-chip');
+    all.forEach(b=>{ if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes(`'${s}'`)) b.classList.add('active'); });
+  }
+  renderTable();
+}
+
+let sortDir = {};
+function sortBy(col, btn) {
+  const data = getActiveData();
+  if(!data.length) return;
+  sortDir[col] = !sortDir[col];
+  const asc = sortDir[col];
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active-sort'));
+  btn.classList.add('active-sort');
+  btn.textContent = (col === 'Företag' || col === 'Company') ? (asc?'A–Z':'Z–A') :
+                    (col === 'Recensioner' || col === 'Reviews') ? (asc?'Rev. ↑':'Rev. ↓') :
+                    (col === 'Betyg' || col === 'Rating') ? (asc?'Rating ↑':'Rating ↓') : 'City';
+
+  const batch = getActiveBatch();
+  batch.data.sort((a,b) => {
+    let av=a[col]||a[{Company:'Företag',Reviews:'Recensioner',Rating:'Betyg',City:'Stad'}[col]||col]||'';
+    let bv=b[col]||b[{Company:'Företag',Reviews:'Recensioner',Rating:'Betyg',City:'Stad'}[col]||col]||'';
+    if(col==='Recensioner'||col==='Reviews'||col==='Betyg'||col==='Rating') { av=parseFloat(av)||0; bv=parseFloat(bv)||0; return asc?av-bv:bv-av; }
+    av=String(av).toLowerCase(); bv=String(bv).toLowerCase();
+    return asc?(av<bv?-1:av>bv?1:0):(av>bv?-1:av<bv?1:0);
+  });
+  save(); renderTable();
+}
+
+function getFiltered() {
+  const data = getActiveData();
+  if(currentFilter==='alla') return data.map((_,i)=>i);
+  return data.map((r,i)=>migrateStatus(r.Status)===currentFilter?i:-1).filter(i=>i!==-1);
+}
+
+// ════════════════════════════════════════
+// TABLE — dynamic columns + dynamic pipeline stages
+// DEVELOPER NOTE: renderTable reads COLUMN_DEFS for visible columns and
+// pipelineStages for status options. Both are user-configurable in Settings.
+// getField(r, key) handles both new English keys and legacy Swedish keys.
+// ════════════════════════════════════════
+function getField(r, key) {
+  if(r[key] !== undefined && r[key] !== null) return r[key];
+  const leg = {Company:'Företag',Phone:'Telefon',Category:'Kategori',City:'Stad',
+    Address:'Adress',Rating:'Betyg',Reviews:'Recensioner',Note:'Anteckning'};
+  const legKey = leg[key];
+  return legKey && r[legKey] !== undefined ? r[legKey] : '';
+}
+
+function renderTable() {
+  const tbody = document.getElementById('table-body');
+  const thead = document.getElementById('table-head');
+  const data = getActiveData();
+  const idx = getFiltered();
+  const visibleCols = COLUMN_DEFS.filter(c => isColVisible(c.key));
+
+  if(thead) {
+    thead.innerHTML = `<tr>
+      <th>#</th>
+      ${visibleCols.map((c,ci)=>`<th data-colidx="${ci}" title="Drag to reorder" style="cursor:grab;">${c.label}</th>`).join('')}
+      <th>Status</th><th>Outreach</th><th>Note</th>
+    </tr>`;
+    setTimeout(initColDrag, 0);
+  }
+
+  const colSpan = visibleCols.length + 4;
+  if(!data.length) {
+    tbody.innerHTML = `<tr><td colspan="${colSpan}" class="empty-msg-row">No active batch. Import a list first.</td></tr>`;
+    return;
+  }
+  if(!idx.length) {
+    tbody.innerHTML = `<tr><td colspan="${colSpan}" class="empty-msg-row">No prospects in this stage.</td></tr>`;
+    return;
+  }
+
+  const buildStatusOpts = cur => {
+    const migrated = migrateStatus(cur);
+    return pipelineStages.map(s =>
+      `<option value="${s.key}" ${migrated===s.key?'selected':''}>${s.label}</option>`
+    ).join('');
+  };
+
+  tbody.innerHTML = idx.map(gi => {
+    const r = data[gi];
+    const company = String(getField(r,'Company')||'');
+    const phone   = String(getField(r,'Phone')||'');
+    const reviews = parseFloat(getField(r,'Reviews'));
+    const mob = isMobile(phone);
+    const statusKey = migrateStatus(r.Status || pipelineStages[0]?.key || 'new');
+    const sCls = getStageClass(statusKey);
+
+    const revB = isNaN(reviews) ? `<span class="rev-b rev-mid">—</span>`
+      : reviews<=10 ? `<span class="rev-b rev-low">${reviews}</span>`
+      : reviews<=40 ? `<span class="rev-b rev-mid">${reviews}</span>`
+      : `<span class="rev-b rev-high">${reviews}</span>`;
+
+    const aiBtn = needsAiClean(company)
+      ? `<button id="ai-name-btn-${gi}" onclick="aiShortName(${gi})" title="Clean name with AI" style="background:none;border:none;cursor:pointer;font-size:13px;padding:0 2px;opacity:.6;">✨</button>`
+      : '';
+    const displayName = _nameCache[company]
+      ? `<span style="font-weight:700">${esc(_nameCache[company])}</span> <span style="font-size:10px;color:var(--muted)">${esc(company)}</span>`
+      : esc(regexShortName(company));
+
+    const smsOpts = smsTmpls.length
+      ? smsTmpls.map((s,si)=>`<div class="sms-dd-item" onclick="copySms(${gi},${si},this)">${s.name||'Script '+(si+1)}</div>`).join('')
+      : '<div class="sms-dd-empty">No SMS templates yet.</div>';
+
+    const colCells = visibleCols.map(col => {
+      const val = getField(r, col.key);
+      if(col.key==='Company') return `<td class="td-company" id="name-cell-${gi}">${displayName} ${aiBtn}</td>`;
+      if(col.key==='Phone') return `<td onclick="event.stopPropagation()">${phoneMode==='call'
+        ? `<a class="td-phone" href="tel:${phone}">📞 ${phone}</a>`
+        : `<span class="td-phone" onclick="copyText('${phone}','📋 Copied')" style="cursor:pointer;">💬 ${phone}</span>`}</td>`;
+      if(col.key==='Category') return `<td><span class="cat-pill" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:middle;" title="${esc(cleanKat(String(val))||'')}">${cleanKat(String(val))||'—'}</span></td>`;
+      if(col.key==='Reviews')  return `<td>${revB}</td>`;
+      if(col.key==='Rating')   return `<td style="font-family:'DM Mono',monospace;font-size:11.5px;font-weight:600;color:var(--mid);">${val||'—'}</td>`;
+      return `<td style="font-size:11.5px;color:var(--mid);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(String(val))}">${esc(String(val||'—'))}</td>`;
+    }).join('');
+
+    return `<tr onclick="handleRowClick(event,${gi})">
+      <td><span class="num-badge">${gi+1}</span></td>
+      ${colCells}
+      <td onclick="event.stopPropagation()"><select class="status-pill" style="${getStageStyle(statusKey)}" onchange="updateStatus(${gi},this.value,this)">${buildStatusOpts(r.Status)}</select></td>
+      <td onclick="event.stopPropagation()"><div class="sms-wrap"><button class="sms-btn" onclick="toggleSmsDD(${gi},this)">💬 Copy</button><div class="sms-dropdown" id="sms-dd-${gi}">${smsOpts}</div></div></td>
+      <td onclick="event.stopPropagation()"><input style="background:var(--pale);border:1px solid var(--faint);border-radius:6px;padding:4px 8px;font-size:11.5px;width:140px;font-family:'DM Sans',sans-serif;color:var(--ink);" type="text" value="${esc(String(getField(r,'Note')))}" placeholder="Note..." oninput="updateNote(${gi},this.value)"></td>
+    </tr>`;
+  }).join('');
+}
+
+// cleanKat: normalises category strings for display.
+// Strategy: only translates known Swedish strings. All other languages pass through as-is.
+// This ensures that a dentist in the US stays "Dentist", not "Tandläkare".
+// The Swedish → English mapping only triggers on recognisably Swedish text.
+function cleanKat(k) {
+  if(!k) return '';
+  const s = k.trim();
+
+  // Heuristic: if the string contains Swedish-specific characters or known Swedish words,
+  // apply the Swedish → English mapping. Otherwise pass through untouched.
+  const looksSwedish = /[åäöÅÄÖ]/.test(s) ||
+    /\bVVS\b|rörmok|elektriker|elfirm|målare|taklägg|snicker|städ|glasmäst|låssmed|kyltek|ventilat|markentrepr|golvlägg|kakellägg|byggfirm|fönsterput|säkerhetsfirm|värmepump|värmetek|tapetser|portfirm|asfaltsfirm/i.test(s);
+
+  if(!looksSwedish) return s; // Non-Swedish: return as-is in original language
+
+  // Swedish → English mapping
+  const sv = {
+    'Rörmokare':'Plumber','VVS-firma':'Plumber','VVS-entreprenör':'Plumber',
+    'Elektriker':'Electrician','Elfirma':'Electrician',
+    'Målare':'Painter','Takläggare':'Roofer','Snickare':'Carpenter',
+    'Städfirma':'Cleaning service','Glasmästare':'Glazier','Låssmed':'Locksmith',
+    'Kyltekniker':'Refrigeration technician','Ventilationsfirma':'Ventilation technician',
+    'Markentreprenör':'Landscaper','Golvläggare':'Flooring specialist',
+    'Kakelläggare':'Tiler','Byggfirma':'General contractor',
+    'Fönsterputsare':'Window cleaner','Säkerhetsfirma':'Security company',
+    'Värmepumpstekniker':'Heat pump technician','Värmetekniker':'Heating technician',
+    'Tapetserare':'Wallpaper specialist','Portfirma':'Garage door technician',
+    'Asfaltsfirma':'Paving contractor',
+  };
+  if(sv[s]) return sv[s];
+
+  // Swedish patterns
+  if(/\bVVS\b/i.test(s)) return 'Plumber';
+  if(/el-?install|elentrepr|el-?firma|el-?bolag/i.test(s)) return 'Electrician';
+  if(/taklägg|takfirma/i.test(s)) return 'Roofer';
+  if(/snicker|träarbete/i.test(s)) return 'Carpenter';
+  if(/städ(?!er)/i.test(s)) return 'Cleaning service';
+  if(/måleri|målarfirma/i.test(s)) return 'Painter';
+  if(/glasmäst/i.test(s)) return 'Glazier';
+  if(/låssmed/i.test(s)) return 'Locksmith';
+  if(/kyl.*install|frys.*install/i.test(s)) return 'Refrigeration technician';
+  if(/ventilat/i.test(s)) return 'Ventilation technician';
+  if(/värmepump/i.test(s)) return 'Heat pump technician';
+  if(/schakt|grävning/i.test(s)) return 'Excavation contractor';
+  if(/asfalt(?!era)/i.test(s)) return 'Paving contractor';
+  if(/kakel|klinker/i.test(s)) return 'Tiler';
+  if(/golvlägg/i.test(s)) return 'Flooring specialist';
+  if(/byggentrepr|byggfirma|byggbolag/i.test(s)) return 'General contractor';
+  if(/renovering/i.test(s)) return 'Renovation contractor';
+  if(/fönsterputsn/i.test(s)) return 'Window cleaner';
+  if(/markentrepr/i.test(s)) return 'Landscaper';
+  if(/solcell|solenergi/i.test(s)) return 'Solar installer';
+  if(/värmeinst/i.test(s)) return 'Heating technician';
+  if(/larm(?!en)/i.test(s)) return 'Alarm technician';
+  if(/bilverkstad|bilmek/i.test(s)) return 'Auto mechanic';
+  if(/frisör/i.test(s)) return 'Hair salon';
+  if(/tandläk/i.test(s)) return 'Dentist';
+  if(/sjukgymnast|fysioterapeut/i.test(s)) return 'Physiotherapist';
+  if(/optiker/i.test(s)) return 'Optician';
+  if(/apotek/i.test(s)) return 'Pharmacy';
+  if(/veterinär/i.test(s)) return 'Veterinarian';
+  if(/advokatbyrå/i.test(s)) return 'Law firm';
+  if(/redovisning|revisor/i.test(s)) return 'Accounting firm';
+  if(/fastighets|mäklare/i.test(s)) return 'Real estate agency';
+  if(/flytt(?!a)/i.test(s)) return 'Moving company';
+  if(/restaurang/i.test(s)) return 'Restaurant';
+  if(/bageri/i.test(s)) return 'Bakery';
+  if(/kafé|kaffebar/i.test(s)) return 'Café';
+  if(/träning|gym(?!nasie)/i.test(s)) return 'Gym';
+  if(/nagel/i.test(s)) return 'Nail salon';
+  if(/förskola|dagis/i.test(s)) return 'Nursery';
+  if(/läkare|husläkare/i.test(s)) return 'Doctor';
+
+  // Swedish string but no match: pass through
+  return s;
+}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ════════════════════════════════════════
+// SHORT NAME — regex cleaner + AI fallback
+// ════════════════════════════════════════
+// Cache: företagsnamn → kortnamn (survives session, cleared on reload)
+const _nameCache = {};
+
+function shortName(r) {
+  const full = getField(r,'Company')||'';
+  // Return cached AI result if we have one
+  if(_nameCache[full]) return _nameCache[full];
+  return regexShortName(full);
+}
+
+function regexShortName(full) {
+  let s = full.trim();
+  // Strip legal suffixes: AB, HB, KB, Ek.för, etc (with optional punctuation)
+  s = s.replace(/\s+(AB|HB|KB|Ek\.?för\.?|Handelsbolag|Aktiebolag)\.?$/i, '');
+  // Strip " i [Word]" at end — catches "Rör i Falun", "Service i Dalarna"
+  s = s.replace(/\s+i\s+[A-ZÅÄÖ][a-zåäö]+(\s+[A-ZÅÄÖ][a-zåäö]+)?$/g, '');
+  // Strip trailing comma/dash artifacts
+  s = s.replace(/[,\-]\s*$/, '').trim();
+  return s || full;
+}
+
+function needsAiClean(full) {
+  const cleaned = regexShortName(full);
+  // Flag if still 4+ words — regex might not have caught everything
+  return cleaned.split(/\s+/).length >= 4;
+}
+
+async function aiShortName(gi) {
+  const batch = getActiveBatch(); if(!batch) return;
+  const r = batch.data[gi];
+  const full = getField(r,'Company')||'';
+  const btn = document.getElementById('ai-name-btn-'+gi);
+  if(btn) { btn.textContent = '⏳'; btn.disabled = true; }
+
+  const apiKey = getApiKey();
+  if(!apiKey) {
+    promptApiKey();
+    if(btn) { btn.textContent = '✨'; btn.disabled = false; }
+    return;
+  }
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 50,
+        system: 'Shorten the company name. Return ONLY the short name, nothing else. Max 3 words. Remove city names, legal suffixes like AB or HB, and unnecessary words.',
+        messages: [{ role: 'user', content: full }]
+      })
+    });
+    const data = await resp.json();
+    const short = data.content?.[0]?.text?.trim() || regexShortName(full);
+    _nameCache[full] = short;
+    const cell = document.getElementById('name-cell-'+gi) || document.getElementById('name-cell-'+gi);
+    if(cell) cell.innerHTML = `<span style="font-weight:700">${esc(short)}</span> <span style="font-size:10px;color:var(--muted)">${esc(full)}</span>`;
+    if(btn) btn.remove();
+    showToast('✓ Name shortened: ' + short);
+  } catch(e) {
+    if(btn) { btn.textContent = '✨'; btn.disabled = false; }
+    showToast('❌ Could not shorten name. Try again.');
+  }
+}
+
+// _yrkeCache: maps cleanKat() output to natural English plural for use in [trade] SMS placeholder
+const _yrkeCache = {
+  'Plumber':                  'plumbers',
+  'Electrician':              'electricians',
+  'Painter':                  'painters',
+  'Roofer':                   'roofers',
+  'Carpenter':                'carpenters',
+  'Landscaper':               'landscapers',
+  'Locksmith':                'locksmiths',
+  'Glazier':                  'glaziers',
+  'Tiler':                    'tilers',
+  'Flooring specialist':      'flooring specialists',
+  'General contractor':       'general contractors',
+  'Renovation contractor':    'renovation contractors',
+  'Cleaning service':         'cleaning companies',
+  'Window cleaner':           'window cleaners',
+  'Security company':         'security companies',
+  'Alarm technician':         'alarm technicians',
+  'Solar installer':          'solar installers',
+  'Heating technician':       'heating technicians',
+  'Ventilation technician':   'ventilation technicians',
+  'Refrigeration technician': 'refrigeration technicians',
+  'Heat pump technician':     'heat pump technicians',
+  'Excavation contractor':    'excavation contractors',
+  'Paving contractor':        'paving contractors',
+  'Garage door technician':   'garage door technicians',
+  'Wallpaper specialist':     'wallpaper specialists',
+  'Auto mechanic':            'auto mechanics',
+  'Hair salon':               'hair salons',
+  'Dentist':                  'dentists',
+  'Doctor':                   'doctors',
+  'Physiotherapist':          'physiotherapists',
+  'Optician':                 'opticians',
+  'Pharmacy':                 'pharmacies',
+  'Veterinarian':             'veterinarians',
+  'Law firm':                 'law firms',
+  'Accounting firm':          'accounting firms',
+  'Real estate agency':       'real estate agencies',
+  'Moving company':           'moving companies',
+  'Restaurant':               'restaurants',
+  'Bakery':                   'bakeries',
+  'Café':                     'cafés',
+  'Gym':                      'gyms',
+  'Nail salon':               'nail salons',
+  'Nursery':                  'nurseries',
+};
+
+async function yrkeForSMS(kat) {
+  if(!kat) return '';
+  if(_yrkeCache[kat]) return _yrkeCache[kat];
+  // Unknown category: ask Claude for natural English plural
+  const apiKey = getApiKey();
+  if(!apiKey) return kat.toLowerCase();
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 20,
+        system: 'Return ONLY the natural English plural of the given profession. No punctuation, no explanation. Example input: "Dentist" → output: "dentists".',
+        messages: [{ role: 'user', content: kat }]
+      })
+    });
+    const data = await resp.json();
+    const result = data.content?.[0]?.text?.trim() || kat.toLowerCase();
+    _yrkeCache[kat] = result;
+    return result;
+  } catch(e) { return kat.toLowerCase(); }
+}
+
+// ════════════════════════════════════════
+// API KEY MANAGEMENT
+// ════════════════════════════════════════
+function getApiKey() {
+  return localStorage.getItem('cortex_api_key') || '';
+}
+function promptApiKey() {
+  const current = getApiKey();
+  const key = prompt('Paste your Anthropic API key (saved locally in your browser):', current || '');
+  if(key && key.trim()) {
+    localStorage.setItem('cortex_api_key', key.trim());
+    showToast('✓ API key saved');
+  }
+  updateApiKeyStatus();
+}
+function updateApiKeyStatus() {
+  const el = document.getElementById('api-key-status');
+  if(!el) return;
+  const key = getApiKey();
+  el.textContent = key
+    ? 'API key saved. AI features are active.'
+    : 'Click to add your Anthropic API key.';
+  el.style.color = key ? 'var(--g600)' : '';
+}
+function updateStatus(gi, value, sel) {
+  const batch = getActiveBatch(); if(!batch) return;
+  const r = batch.data[gi];
+  const oldLabel = getStageLabel(migrateStatus(r.Status));
+  r.Status = value;
+  const style = getStageStyle(migrateStatus(value));
+  sel.className = 'status-pill';
+  sel.style.cssText = style;
+  // Log status change to timeline
+  if(!r.timeline) r.timeline = [];
+  r.timeline.unshift({ action: `Status: ${oldLabel} → ${getStageLabel(value)}`, ts: Date.now() });
+  save(); renderStats();
+  // Sync lead panel if open on same lead
+  if(_panelGi === gi) {
+    const lpSel = document.getElementById('lp-status');
+    lpSel.value = value;
+    lpSel.className = 'status-pill';
+    lpSel.style.cssText = style;
+    renderLeadTimeline(r);
+  }
+}
+function updateNote(gi, value) {
+  const batch = getActiveBatch(); if(!batch) return;
+  const nr=batch.data[gi]; if('Anteckning' in nr) nr.Anteckning=value; else nr.Note=value;
+  save();
+}
+
+// SMS dropdown
+let openDD = null;
+function toggleSmsDD(gi, btn) {
+  if(smsTmpls.length === 1) { copySms(gi, 0, btn); return; }
+  const dd = document.getElementById('sms-dd-'+gi);
+  if(openDD && openDD !== dd) openDD.classList.remove('open');
+  if(dd.classList.contains('open')) {
+    dd.classList.remove('open');
+    openDD = null;
+    return;
+  }
+  // Position fixed dropdown above/below the button
+  const rect = btn.getBoundingClientRect();
+  const spaceAbove = rect.top;
+  const spaceBelow = window.innerHeight - rect.bottom;
+  dd.style.left = Math.min(rect.left, window.innerWidth - 240) + 'px';
+  if(spaceAbove > 200 && spaceAbove > spaceBelow) {
+    dd.style.top = '';
+    dd.style.bottom = (window.innerHeight - rect.top + 4) + 'px';
+  } else {
+    dd.style.bottom = '';
+    dd.style.top = (rect.bottom + 4) + 'px';
+  }
+  dd.classList.add('open');
+  openDD = dd;
+}
+document.addEventListener('click', e => {
+  if(openDD && !e.target.closest('.sms-wrap')) { openDD.classList.remove('open'); openDD=null; }
+});
+async function copySms(gi, si, itemEl) {
+  const batch = getActiveBatch(); if(!batch) return;
+  const r = batch.data[gi];
+  const tmpl = smsTmpls[si]?.text || '';
+  const katRaw = cleanKat(getField(r,'Category')||'');
+  const yrke = await yrkeForSMS(katRaw);
+  const namn = shortName(r);
+  const text = tmpl
+    .replace(/\(name\)/gi, namn)
+    .replace(/\(city\)/gi, getField(r,'City')||'')
+    .replace(/\(trade\)/gi, yrke)
+    .replace(/\[name\]/gi, namn)
+    .replace(/\[city\]/gi, getField(r,'City')||'')
+    .replace(/\[trade\]/gi, yrke)
+    .replace(/\[namn\]/gi, namn)
+    .replace(/\[stad\]/gi, getField(r,'City')||'')
+    .replace(/\[yrke\]/gi, yrke);
+  copyText(text, '💬 SMS copied');
+  if(openDD) { openDD.classList.remove('open'); openDD=null; }
+}
+
+function copyText(text, msg) {
+  const done = () => showToast(msg||'📋 Kopierat');
+  if(navigator.clipboard) navigator.clipboard.writeText(text).then(done).catch(()=>fbCopy(text,done));
+  else fbCopy(text,done);
+}
+function fbCopy(t,cb){const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.focus();a.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(a);cb();}
+
+// ════════════════════════════════════════
+// BATCH LIST
+// ════════════════════════════════════════
+function renderBatchList() {
+  const el = document.getElementById('batch-list');
+  if(!batches.length) { el.innerHTML='<div class="no-batches">No batches yet.</div>'; return; }
+  el.innerHTML = batches.map((b,i) => {
+    const isActive = b.id === activeBatchId;
+    return `<div class="batch-item-wrap" data-idx="${i}">
+      <div class="batch-item ${isActive?'active-batch':''}" onclick="setActiveBatch(${b.id})">
+        <span class="batch-drag-handle"
+          onmousedown="batchHandleMouseDown(event,${i})"
+          onclick="event.stopPropagation()"
+          title="Drag to reorder">⋮⋮</span>
+        <span class="batch-name-btn" id="bname-${b.id}" title="${esc(b.name)}">${esc(b.name)}</span>
+        <button class="batch-del" onclick="event.stopPropagation();startBatchRename(${b.id})" title="Rename" style="font-size:11px;padding:0 3px;opacity:.7;">✎</button>
+        <button class="batch-del" onclick="event.stopPropagation();deleteBatch(event,${b.id})" title="Delete">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════
+// SHARED DRAG-TO-REORDER ENGINE
+// ════════════════════════════════════════
+// makeDraggableList(opts) wires up smooth mousedown/mousemove/mouseup reordering
+// for any list. Used by both batches and pipeline stages.
+//
+// opts = {
+//   getItems()         → returns NodeList/Array of row elements (in DOM order)
+//   getCount()         → number of items
+//   onSwap(a, b)       → called when item at index a is moved to index b; update data + re-render
+//   onDone()           → called on mouseup; persist data
+//   itemClass          → CSS class for drag animation (e.g. 'batch-item-wrap' or 'stage-row')
+// }
+//
+// Each row element must have a data-idx attribute matching its position.
+//
+function makeDraggableList({ getItems, onSwap, onDone, itemClass }) {
+  let src = null;         // source index
+  let cur = null;         // current target index
+  let active = false;     // threshold crossed
+
+  function clearClasses() {
+    getItems().forEach(el =>
+      el.classList.remove('is-dragging', 'drag-above', 'drag-below')
+    );
+  }
+
+  function applyShift(srcIdx, overIdx) {
+    getItems().forEach(el => {
+      el.classList.remove('drag-above', 'drag-below');
+      const idx = parseInt(el.dataset.idx);
+      if(idx === srcIdx) return;
+      if(srcIdx < overIdx && idx > srcIdx && idx <= overIdx) el.classList.add('drag-below');
+      if(srcIdx > overIdx && idx >= overIdx && idx < srcIdx) el.classList.add('drag-above');
+    });
+  }
+
+  // Called from each row's handle onmousedown
+  function start(e, idx) {
+    if(e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    src = idx;
+    cur = idx;
+    active = false;
+
+    const startY = e.clientY;
+
+    function onMove(e) {
+      if(!active && Math.abs(e.clientY - startY) < 5) return;
+      active = true;
+
+      // Mark source as dragging
+      const items = getItems();
+      items.forEach((el, i) => {
+        if(i === src) el.classList.add('is-dragging');
+      });
+
+      // Find which item the cursor is over
+      let over = cur;
+      items.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        const mid  = rect.top + rect.height / 2;
+        if(e.clientY >= rect.top && e.clientY < rect.top + rect.height) {
+          over = parseInt(el.dataset.idx);
+        }
+      });
+
+      if(over !== cur) {
+        applyShift(src, over);
+        cur = over;
+      }
+    }
+
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup',   onUp);
+      clearClasses();
+
+      if(active && cur !== null && cur !== src) {
+        onSwap(src, cur);
+      }
+      onDone();
+      src = null; cur = null; active = false;
+    }
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup',   onUp);
+  }
+
+  return { start };
+}
+
+// ── Batch drag instance ──────────────────────────────────────────────────────
+const _batchDragger = makeDraggableList({
+  getItems: () => Array.from(document.querySelectorAll('#batch-list .batch-item-wrap')),
+  onSwap: (a, b) => {
+    const moved = batches.splice(a, 1)[0];
+    batches.splice(b, 0, moved);
+    renderBatchList();
+  },
+  onDone: () => save(),
+});
+
+function batchHandleMouseDown(e, idx) {
+  _batchDragger.start(e, idx);
+}
+
+// ── Stage drag instance ──────────────────────────────────────────────────────
+// Created fresh each time renderSettings() runs (after re-render)
+let _stageDragger = null;
+
+function initStageDrag() {
+  _stageDragger = makeDraggableList({
+    getItems: () => Array.from(document.querySelectorAll('#stages-list .stage-row')),
+    onSwap: (a, b) => {
+      const moved = pipelineStages.splice(a, 1)[0];
+      pipelineStages.splice(b, 0, moved);
+      LS.set('pipelineStages', pipelineStages);
+      renderSettings();        // re-render with new order
+      renderFilterChips();
+    },
+    onDone: () => {},          // already saved in onSwap
+  });
+}
+
+function stageHandleMouseDown(e, idx) {
+  if(_stageDragger) _stageDragger.start(e, idx);
+}
+
+function startBatchRename(id) {
+  const nameEl = document.getElementById('bname-'+id);
+  if(!nameEl) return;
+  const b = batches.find(x=>x.id===id); if(!b) return;
+  const input = document.createElement('input');
+  input.className = 'batch-name-input';
+  input.value = b.name;
+  input.style.flex = '1';
+  nameEl.replaceWith(input);
+  input.focus(); input.select();
+  const finish = () => {
+    const val = input.value.trim() || b.name;
+    b.name = val;
+    save(); renderBatchList();
+  };
+  input.addEventListener('blur', finish);
+  input.addEventListener('keydown', e => {
+    if(e.key==='Enter') input.blur();
+    if(e.key==='Escape') { input.value=b.name; input.blur(); }
+    e.stopPropagation();
+  });
+}
+
+function setActiveBatch(id) {
+  activeBatchId = id;
+  save();
+  const b = getActiveBatch();
+  if(b) {
+    PAGE_META.lista.sub = `${b.data.length} prospects · ${b.name}`;
+    document.getElementById('list-badge').textContent = b.data.length;
+    document.getElementById('list-badge').style.display = '';
+  }
+  renderBatchList();
+  switchTab('lista');
+  renderTable(); renderStats();
+  updateListTitle();
+}
+
+function deleteBatch(e, id) {
+  e.stopPropagation();
+  batches = batches.filter(b=>b.id!==id);
+  if(activeBatchId===id) activeBatchId = batches.length ? batches[batches.length-1].id : null;
+  save(); renderBatchList();
+  if(activeBatchId) { renderTable(); renderStats(); }
+  showToast('Batch removed');
+}
+
+// ════════════════════════════════════════
+// STATS
+// ════════════════════════════════════════
+function renderStats() {
+  const data = getActiveData();
+  const total = data.length;
+  const counts = {};
+  pipelineStages.forEach(s=>counts[s.key]=0);
+  data.forEach(r=>{ const k=migrateStatus(r.Status||'new'); if(counts[k]!==undefined) counts[k]++; else counts[k]=1; });
+
+  const firstKey = pipelineStages[0]?.key||'new';
+  const skickat = data.filter(r=>migrateStatus(r.Status)!==firstKey).length;
+  const positiveKeys = pipelineStages.slice(2).filter(s=>s.key!=='lost').map(s=>s.key);
+  const positivt = positiveKeys.reduce((sum,k)=>sum+(counts[k]||0), 0);
+  const meetingKey = pipelineStages.find(s=>s.key==='meeting'||s.label.toLowerCase().includes('meeting'))?.key||pipelineStages[Math.max(0,pipelineStages.length-2)]?.key;
+  const booked = counts[meetingKey]||0;
+  const pPos = skickat>0 ? Math.round(positivt/skickat*100) : 0;
+  const pBook = skickat>0 ? Math.round(booked/skickat*100) : 0;
+  const pResp = skickat>0 ? Math.round((positivt+(counts['negative']||0))/skickat*100) : 0;
+
+  const b = getActiveBatch();
+  document.getElementById('stats-sub').textContent = b ? `${b.name} · ${total} prospects` : '—';
+
+  // KPIs
+  document.getElementById('kpi-row').innerHTML = [
+    {label:'Total leads',    value:total,    cls:'',         pct:'in list',                                          bar:'#d4d4d8'},
+    {label:'Contacted',      value:skickat,  cls:'kpi-blue', pct:total>0?Math.round(skickat/total*100)+'% of list':'', bar:'#7dd3fc'},
+    {label:'Positive reply', value:positivt, cls:'kpi-green',pct:pPos+'% of contacted',                              bar:'#86efac'},
+    {label:'Meetings',       value:booked,   cls:'kpi-green',pct:pBook+'% of contacted',                             bar:'#6ee7b7'},
+  ].map(k=>`
+    <div class="kpi-card ${k.cls}">
+      <div class="kpi-top-bar" style="background:${k.bar}"></div>
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      ${k.pct?`<div class="kpi-sub">${k.pct}</div>`:''}
+    </div>`).join('');
+
+  // Status bars — enhanced with count badges, percentage labels, and filled bars
+  const maxCount = Math.max(...pipelineStages.map(s => counts[s.key]||0), 1);
+  document.getElementById('status-bars').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px;">
+    ${pipelineStages.map(s => {
+      const cnt = counts[s.key]||0;
+      const pct = total>0 ? Math.round(cnt/total*100) : 0;
+      const barW = total>0 ? Math.round(cnt/maxCount*100) : 0;
+      return `<div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <span style="width:10px;height:10px;border-radius:50%;background:${s.color};display:inline-block;flex-shrink:0;"></span>
+            <span style="font-size:12.5px;font-weight:500;color:var(--mid);">${s.label}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:13px;font-weight:700;color:var(--ink);">${cnt}</span>
+            <span style="font-size:10.5px;color:var(--muted);width:38px;text-align:right;">${pct}%</span>
+          </div>
+        </div>
+        <div style="height:8px;background:var(--pale);border-radius:6px;overflow:hidden;">
+          <div style="width:${barW}%;height:100%;background:${s.color};border-radius:6px;transition:width .6s cubic-bezier(.34,1.56,.64,1);"></div>
+        </div>
+      </div>`;
+    }).join('')}
+    </div>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--faint);display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);">Total prospects</span>
+      <span style="font-size:20px;font-weight:700;letter-spacing:-1px;color:var(--ink);">${total}</span>
+    </div>`;
+
+  // Funnel
+  document.getElementById('funnel').innerHTML = [
+    {label:'Reply rate',   desc:'Of sent → replied (pos+neg)', value:pResp+'%', good:pResp>=20},
+    {label:'Positive rate',desc:'Of sent → positive reply',    value:pPos+'%',  good:pPos>=10},
+    {label:'Meeting rate', desc:'Of sent → meeting booked',    value:pBook+'%', good:pBook>=5},
+  ].map(f=>`
+    <div class="funnel-item">
+      <div>
+        <div class="funnel-label">${f.label}</div>
+        <div class="funnel-desc">${f.desc}</div>
+      </div>
+      <div class="funnel-val" style="color:${skickat===0?'var(--muted)':f.good?'var(--g600)':'var(--amber)'};">${f.value}</div>
+    </div>`).join('');
+
+  // Manus compare — only what manus affects
+  const manusCards = smsTmpls.map((m,i) => {
+    const rows = data.filter(r=>r.SmsIdx===i);
+    const pos = rows.filter(r=>positiveKeys.includes(migrateStatus(r.Status)));
+    const bok = rows.filter(r=>migrateStatus(r.Status)===meetingKey);
+    const pP = rows.length>0?Math.round(pos.length/rows.length*100):0;
+    const pB = rows.length>0?Math.round(bok.length/rows.length*100):0;
+    const c = TMPL_COLORS[i%TMPL_COLORS.length];
+    return `<div class="manus-cmp-card" style="border-left:3px solid ${c}">
+      <div>
+        <div class="manus-cmp-name">${m.name||'Script '+(i+1)}</div>
+        <div class="manus-cmp-stats">
+          <div class="manus-cmp-stat">
+            <div class="manus-cmp-val">${rows.length}</div>
+            <div class="manus-cmp-lbl">Contacted</div>
+          </div>
+          <div class="manus-cmp-stat">
+            <div class="manus-cmp-val" style="color:var(--g600)">${pos.length}</div>
+            <div class="manus-cmp-lbl">Positive</div>
+          </div>
+          <div class="manus-cmp-stat">
+            <div class="manus-cmp-val" style="color:var(--g700)">${bok.length}</div>
+            <div class="manus-cmp-lbl">Meetings</div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:28px;font-weight:700;letter-spacing:-1px;color:${pB>=5?'var(--g600)':'var(--amber)'};">${pB}%</div>
+        <div style="font-size:9.5px;color:var(--muted);">conv.</div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('manus-compare').innerHTML = manusCards.length
+    ? `<div class="manus-compare-row">${manusCards.join('')}</div>`
+    : '<p style="color:var(--muted);font-size:12.5px;">No scripts added yet. Add one under SMS Templates.</p>';
+}
+
+// ════════════════════════════════════════
+// PDF
+// ════════════════════════════════════════
+function openPdf() { document.getElementById('pdf-overlay').classList.add('open'); }
+function closePdf() { document.getElementById('pdf-overlay').classList.remove('open'); }
+
+function generatePDF() {
+  closePdf();
+  const b = getActiveBatch(); if(!b) { showToast('No active batch'); return; }
+  const data = b.data;
+  const total = data.length;
+  const counts = {};
+  pipelineStages.forEach(s=>counts[s.key]=0);
+  data.forEach(r=>{ const k=migrateStatus(r.Status||'new'); if(counts[k]!==undefined) counts[k]++; else counts[k]=1; });
+  const firstStagePDF = pipelineStages[0]?.key||'new';
+  const sent = data.filter(r=>migrateStatus(r.Status)!==firstStagePDF).length;
+  const posKeysPDF = pipelineStages.slice(2).filter(s=>s.key!=='lost').map(s=>s.key);
+  const positive = posKeysPDF.reduce((sum,k)=>sum+(counts[k]||0),0);
+  const meetingKeyPDF = pipelineStages.find(s=>s.key==='meeting'||s.label.toLowerCase().includes('meeting'))?.key||pipelineStages[Math.max(0,pipelineStages.length-2)]?.key;
+  const booked = counts[meetingKeyPDF]||0;
+  const pPos = sent>0?Math.round(positive/sent*100):0;
+  const pBook = sent>0?Math.round(booked/sent*100):0;
+  const today = new Date().toLocaleDateString('en-GB');
+
+  // Logo for PDF
+  const logoImg = LS.get('userLogo');
+  const logoEl = logoImg
+    ? `<img src="${logoImg}" style="width:28px;height:28px;object-fit:contain;border-radius:6px;" alt="Logo">`
+    : `<div class="logo-b"><svg viewBox="0 0 18 18" width="16" height="16"><path d="M2 9 Q4.5 4 7 9 Q9.5 14 12 9 Q14.5 4 17 9" stroke="#4ade80" stroke-width="2" stroke-linecap="round" fill="none"/></svg></div>`;
+
+  // SVG bar chart for PDF — more height, numbers above bars with proper spacing
+  const items = pipelineStages.map(s=>({l:s.label,v:counts[s.key]||0,c:s.color}));
+  const maxV = Math.max(...items.map(i=>i.v),1);
+  const bw=44,gap=16,bh=100,pad=20,labelH=44;
+  const svgW = items.length*(bw+gap)-gap+pad*2;
+  const svgH = bh+labelH+20;
+  const bars = items.map((it,i)=>{
+    const h=Math.max(Math.round(it.v/maxV*bh),2);
+    const x=pad+i*(bw+gap); const y=bh-h+4;
+    const shortL = it.l.length>8 ? it.l.slice(0,8)+'…' : it.l;
+    return `<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="5" fill="${it.c}"/>
+<text x="${x+bw/2}" y="${y-6}" text-anchor="middle" font-size="12" font-weight="700" fill="#09090b" font-family="DM Sans,sans-serif">${it.v}</text>
+<text x="${x+bw/2}" y="${bh+18}" text-anchor="middle" font-size="9" fill="#71717a" font-family="DM Mono,monospace">${shortL}</text>`;
+  }).join('');
+  const svgBar = `<svg width="${svgW}" height="${svgH}" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">${bars}</svg>`;
+
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>Flowreach · ${b.name}</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:'DM Sans',sans-serif;background:#fff;color:#09090b;-webkit-print-color-adjust:exact;print-color-adjust:exact;display:flex;flex-direction:column;min-height:100vh;}
+@media print{.no-print{display:none;}@page{margin:1.2cm 1.5cm;size:A4;}}
+.hdr{background:#09090b;padding:32px 40px 28px;color:#fff;flex-shrink:0;}
+.hdr-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;}
+.logo-row{display:flex;align-items:center;gap:9px;}
+.logo-b{width:28px;height:28px;background:#18181b;border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.logo-n{font-size:13px;font-weight:700;color:#fff;}
+.logo-s{font-size:8px;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase;font-family:'DM Mono',monospace;margin-top:1px;}
+.rep-date{font-size:10.5px;color:rgba(255,255,255,.4);text-align:right;font-family:'DM Mono',monospace;}
+.hdr-title{font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:4px;}
+.hdr-sub{font-size:12px;color:rgba(255,255,255,.45);}
+.body-wrap{flex:1;}
+.sec{padding:22px 40px;border-bottom:1px solid #f4f4f5;}
+.sec:last-child{border-bottom:none;}
+.sec-t{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#a1a1aa;margin-bottom:14px;font-family:'DM Mono',monospace;}
+.kpi-g{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.kpi{background:#fafafa;border-radius:10px;padding:14px;text-align:center;border:1px solid #f4f4f5;}
+.kpi-l{font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a1a1aa;margin-bottom:5px;font-family:'DM Mono',monospace;}
+.kpi-v{font-size:28px;font-weight:700;letter-spacing:-1px;}
+.fnl{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.fi{text-align:center;padding:16px;background:#fafafa;border-radius:10px;border:1px solid #f4f4f5;}
+.fi-v{font-size:28px;font-weight:700;letter-spacing:-1px;font-family:'DM Mono',monospace;}
+.fi-l{font-size:12px;font-weight:600;margin-top:3px;}
+.fi-d{font-size:9px;color:#a1a1aa;font-family:'DM Mono',monospace;margin-top:1px;}
+.footer{padding:14px 40px;background:#fafafa;border-top:1px solid #f4f4f5;font-size:9px;color:#a1a1aa;font-family:'DM Mono',monospace;text-align:center;flex-shrink:0;}
+.print-btn{position:fixed;bottom:20px;right:20px;padding:11px 20px;background:#09090b;color:#fff;border:none;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2);}
+</style></head><body>
+<button class="print-btn no-print" onclick="window.print()">🖨 Save as PDF</button>
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="logo-row">
+      ${logoEl}
+      <div><div class="logo-n">Flowreach</div><div class="logo-s">B2B Lead CRM</div></div>
+    </div>
+    <div class="rep-date">Report · ${today}</div>
+  </div>
+  <div class="hdr-title">${esc(b.name)}</div>
+  <div class="hdr-sub">Batch report · ${total} prospects · ${sent} sent</div>
+</div>
+<div class="body-wrap">
+<div class="sec">
+  <div class="sec-t">Key metrics</div>
+  <div class="kpi-g">
+    <div class="kpi"><div class="kpi-l">Total</div><div class="kpi-v">${total}</div></div>
+    <div class="kpi" style="border-top:3px solid #7dd3fc"><div class="kpi-l">Sent</div><div class="kpi-v" style="color:#0369a1">${sent}</div></div>
+    <div class="kpi" style="border-top:3px solid #86efac"><div class="kpi-l">Positive replies</div><div class="kpi-v" style="color:#15803d">${positive}</div></div>
+    <div class="kpi" style="border-top:3px solid #6ee7b7"><div class="kpi-l">Meetings booked</div><div class="kpi-v" style="color:#065f46">${booked}</div></div>
+  </div>
+</div>
+<div class="sec">
+  <div class="sec-t">Conversion funnel</div>
+  <div class="fnl">
+    <div class="fi"><div class="fi-v" style="color:${pPos>=10?'#15803d':'#d97706'}">${pPos}%</div><div class="fi-l">Positive rate</div><div class="fi-d">Of sent → positive</div></div>
+    <div class="fi"><div class="fi-v" style="color:${pBook>=5?'#15803d':'#d97706'}">${pBook}%</div><div class="fi-l">Meeting rate</div><div class="fi-d">Of sent → meeting</div></div>
+    <div class="fi"><div class="fi-v">${sent}</div><div class="fi-l">Total sent</div><div class="fi-d">Of ${total} prospects</div></div>
+  </div>
+</div>
+<div class="sec"><div class="sec-t">Status breakdown</div>
+  <div style="overflow-x:auto;margin-bottom:20px;">${svgBar}</div>
+  <table style="width:100%;border-collapse:collapse;font-size:11px;">
+    <tr style="border-bottom:1px solid #e4e4e7;">
+      <th style="text-align:left;padding:6px 10px;font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a1a1aa;font-family:'DM Mono',monospace;">Stage</th>
+      <th style="text-align:center;padding:6px 10px;font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a1a1aa;font-family:'DM Mono',monospace;">Count</th>
+      <th style="text-align:center;padding:6px 10px;font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a1a1aa;font-family:'DM Mono',monospace;">%</th>
+    </tr>
+    ${pipelineStages.map(s=>`<tr style="border-bottom:1px solid #f4f4f5;">
+      <td style="padding:7px 10px;font-size:11px;font-weight:500;color:#27272a;display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${s.color};"></span>${s.label}</td>
+      <td style="padding:7px 10px;text-align:center;font-size:13px;font-weight:700;color:#09090b;">${counts[s.key]||0}</td>
+      <td style="padding:7px 10px;text-align:center;font-size:11px;color:#71717a;">${total>0?Math.round((counts[s.key]||0)/total*100):0}%</td>
+    </tr>`).join('')}
+  </table>
+</div>
+</div>
+<div class="footer">Flowreach · ${esc(b.name)} · ${today} · github.com/iamSamuelPires</div>
+</body></html>`;
+
+  const win = window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+}
+
+// ════════════════════════════════════════
+// EXCEL EXPORT
+// DEVELOPER NOTE: Exports only visible columns (per colVisibility settings).
+// Column headers use the English labels from COLUMN_DEFS, not raw Outscraper keys.
+// Status values use the English stage labels, not internal keys.
+// ════════════════════════════════════════
+function exportExcel() {
+  const b = getActiveBatch(); if(!b) { showToast('No active batch'); return; }
+  const visibleCols = COLUMN_DEFS.filter(c => isColVisible(c.key));
+
+  const rows = b.data.map(r => {
+    const row = {};
+    visibleCols.forEach(col => {
+      row[col.label] = getField(r, col.key) || '';
+    });
+    row['Status'] = getStageLabel(migrateStatus(r.Status || pipelineStages[0]?.key || 'new'));
+    row['SMS Script'] = r.SmsIdx>=0&&smsTmpls[r.SmsIdx] ? (smsTmpls[r.SmsIdx].name||'Script '+(r.SmsIdx+1)) : '—';
+    row['Note'] = getField(r, 'Note') || '';
+    return row;
+  });
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Prospects');
+  XLSX.writeFile(wb, (b.name||'batch').replace(/[^a-z0-9_\-]/gi,'_')+'_export.xlsx');
+  showToast('✓ Excel exported');
+}
+
+// ════════════════════════════════════════
+// LEAD DETAIL PANEL
+// DEVELOPER NOTE: openLeadPanel(gi) reads from the active batch by index.
+// All mutations (status, note, script) write back to batch.data[gi] and save().
+// Timeline: each lead has a lead.timeline[] array of {action, ts} entries.
+// Entries are added when status changes or notes are saved.
+// ════════════════════════════════════════
+let _panelGi = null; // current open lead index
+
+function handleRowClick(e, gi) {
+  // Don't open panel if clicking on interactive elements
+  if(e.target.closest('select,input,button,a')) return;
+  openLeadPanel(gi);
+}
+
+function openLeadPanel(gi) {
+  const batch = getActiveBatch(); if(!batch) return;
+  const r = batch.data[gi];
+  _panelGi = gi;
+
+  const company = getField(r,'Company');
+  const phone   = getField(r,'Phone');
+  const city    = getField(r,'City');
+  const cat     = cleanKat(getField(r,'Category'));
+  const addr    = getField(r,'Address');
+  const rating  = getField(r,'Rating');
+  const reviews = getField(r,'Reviews');
+
+  // Header
+  document.getElementById('lp-company').textContent = regexShortName(company)||company;
+  document.getElementById('lp-meta').textContent = [cat, city].filter(Boolean).join(' · ');
+
+  // Status dropdown
+  const statusSel = document.getElementById('lp-status');
+  const curKey = migrateStatus(r.Status || pipelineStages[0]?.key || 'new');
+  statusSel.innerHTML = pipelineStages.map(s =>
+    `<option value="${s.key}" ${s.key===curKey?'selected':''}>${s.label}</option>`
+  ).join('');
+  statusSel.className = 'status-pill';
+  statusSel.style.cssText = getStageStyle(curKey) + 'width:100%;padding:8px 12px;font-size:12.5px;border-radius:var(--r-sm);cursor:pointer;';
+
+  // Info grid — only show fields with actual values
+  const infoItems = [
+    { label: 'Phone',    value: phone },
+    { label: 'City',     value: city },
+    { label: 'Address',  value: addr },
+    { label: 'Category', value: cat },
+    { label: 'Rating',   value: rating ? `${rating} ★` : null },
+    { label: 'Reviews',  value: reviews || null },
+  ].filter(i => i.value);
+
+  document.getElementById('lp-info-grid').innerHTML = infoItems.map(item => `
+    <div class="lead-info-item">
+      <div class="lead-info-label">${item.label}</div>
+      <div class="lead-info-value">${item.value}</div>
+    </div>`).join('');
+
+  // Note
+  document.getElementById('lp-note').value = getField(r,'Note') || '';
+
+  // Call script selector
+  const scriptSel = document.getElementById('lp-script');
+  const curManusIdx = r.ManusIdx !== undefined ? r.ManusIdx : -1;
+  scriptSel.innerHTML = '<option value="-1">No script selected</option>' +
+    manusTmpls.map((m,i) => `<option value="${i}" ${i===curManusIdx?'selected':''}>${m.name||'Script '+(i+1)}</option>`).join('');
+  updateLeadPanelScriptPreview(curManusIdx);
+
+  // Timeline
+  renderLeadTimeline(r);
+
+  // Open panel
+  document.getElementById('lead-overlay').classList.add('open');
+  document.getElementById('lead-panel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLeadPanel() {
+  document.getElementById('lead-overlay').classList.remove('open');
+  document.getElementById('lead-panel').classList.remove('open');
+  document.body.style.overflow = '';
+  _panelGi = null;
+}
+
+function updateLeadPanelStatus(value) {
+  if(_panelGi === null) return;
+  const batch = getActiveBatch(); if(!batch) return;
+  const r = batch.data[_panelGi];
+  const oldLabel = getStageLabel(migrateStatus(r.Status));
+  r.Status = value;
+  // Log to timeline
+  if(!r.timeline) r.timeline = [];
+  r.timeline.unshift({ action: `Status changed: ${oldLabel} → ${getStageLabel(value)}`, ts: Date.now() });
+  save();
+  // Update pill class
+  const sel = document.getElementById('lp-status');
+  sel.className = 'status-pill ' + getStageClass(value);
+  renderLeadTimeline(r);
+  // Update table row status pill
+  const tableSel = document.querySelector(`#table-body tr:nth-child(${_panelGi+1}) .status-pill`);
+  if(tableSel) { tableSel.value = value; tableSel.className = 'status-pill '+getStageClass(value); }
+  renderTable(); renderStats();
+}
+
+function updateLeadPanelNote(value) {
+  if(_panelGi === null) return;
+  const batch = getActiveBatch(); if(!batch) return;
+  const r = batch.data[_panelGi];
+  if('Anteckning' in r) r.Anteckning = value; else r.Note = value;
+  save();
+}
+
+function updateLeadPanelScript(value) {
+  if(_panelGi === null) return;
+  const batch = getActiveBatch(); if(!batch) return;
+  batch.data[_panelGi].ManusIdx = parseInt(value);
+  save();
+  updateLeadPanelScriptPreview(parseInt(value));
+}
+
+function updateLeadPanelScriptPreview(idx) {
+  const preview = document.getElementById('lp-script-preview');
+  if(idx >= 0 && manusTmpls[idx]) {
+    preview.style.display = 'block';
+    preview.textContent = manusTmpls[idx].text || '(empty script)';
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+function renderLeadTimeline(r) {
+  const el = document.getElementById('lp-timeline');
+  const timeline = r.timeline || [];
+  if(!timeline.length) {
+    el.innerHTML = `<div style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0;">No activity yet. Status changes will appear here.</div>`;
+    return;
+  }
+  el.innerHTML = timeline.slice(0,20).map(item => {
+    const d = new Date(item.ts);
+    const timeStr = d.toLocaleDateString('en-GB') + ' ' + d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div>
+        <div class="timeline-text">${esc(item.action)}</div>
+        <div class="timeline-time">${timeStr}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════
+// COLUMN DRAG REORDER
+// DEVELOPER NOTE: Users can drag table column headers to reorder them.
+// Reorder is stored in colOrder[] in localStorage.
+// COLUMN_DEFS is reordered in-place, then renderTable() rebuilds headers + rows.
+// ════════════════════════════════════════
+let _colDragSrc = null;
+
+// ── Live column drag ─────────────────────────────────────────────────────────
+// Uses mousedown/mousemove/mouseup instead of the HTML5 drag API.
+// This gives us full control: no browser ghost image, columns shift live
+// as the cursor moves over them, smooth CSS transitions on neighbours.
+//
+// State:
+//   _colDragSrc   — index of the column being dragged
+//   _colDragGhost — the floating pill label following the cursor
+//   _colDragOver  — index of the column currently hovered (insertion target)
+//
+function initColDrag() {
+  const ths = Array.from(document.querySelectorAll('#table-head th[data-colidx]'));
+  if(!ths.length) return;
+
+  ths.forEach(th => {
+    th.addEventListener('mousedown', onColMouseDown);
+  });
+}
+
+let _colDragGhost = null;
+let _colDragOver  = null;
+let _colDragActive = false;
+
+function onColMouseDown(e) {
+  // Only left button, ignore clicks on interactive children
+  if(e.button !== 0) return;
+  e.preventDefault();
+
+  const th = e.currentTarget;
+  _colDragSrc  = parseInt(th.dataset.colidx);
+  _colDragOver = _colDragSrc;
+  _colDragActive = false; // only activate after small movement threshold
+
+  const startX = e.clientX;
+  const startY = e.clientY;
+
+  // Create ghost label (hidden until threshold crossed)
+  _colDragGhost = document.createElement('div');
+  _colDragGhost.id = 'col-drag-ghost';
+  _colDragGhost.textContent = th.textContent.trim();
+  _colDragGhost.style.opacity = '0';
+  document.body.appendChild(_colDragGhost);
+
+  function onMouseMove(e) {
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    // Activate after 6px of movement to avoid accidental drags
+    if(!_colDragActive && Math.sqrt(dx*dx + dy*dy) < 6) return;
+    _colDragActive = true;
+
+    // Show ghost following cursor
+    _colDragGhost.style.opacity = '1';
+    _colDragGhost.style.left = e.clientX + 'px';
+    _colDragGhost.style.top  = e.clientY + 'px';
+
+    // Mark source column as dragging
+    th.classList.add('col-dragging');
+
+    // Find which th the cursor is over
+    const allThs = Array.from(document.querySelectorAll('#table-head th[data-colidx]'));
+    let hoveredIdx = _colDragSrc;
+    for(const t of allThs) {
+      const rect = t.getBoundingClientRect();
+      if(e.clientX >= rect.left && e.clientX <= rect.right) {
+        hoveredIdx = parseInt(t.dataset.colidx);
+        break;
+      }
+    }
+
+    // Only update shift classes when insertion point changes
+    if(hoveredIdx !== _colDragOver) {
+      _colDragOver = hoveredIdx;
+      allThs.forEach(t => {
+        t.classList.remove('col-shift-left','col-shift-right');
+        const idx = parseInt(t.dataset.colidx);
+        if(idx === _colDragSrc) return;
+        if(_colDragSrc < _colDragOver) {
+          // Dragging right: columns between src+1 and dest shift left
+          if(idx > _colDragSrc && idx <= _colDragOver) t.classList.add('col-shift-left');
+        } else {
+          // Dragging left: columns between dest and src-1 shift right
+          if(idx >= _colDragOver && idx < _colDragSrc) t.classList.add('col-shift-right');
+        }
+      });
+    }
+  }
+
+  function onMouseUp(e) {
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup',   onMouseUp);
+
+    // Clean up ghost
+    if(_colDragGhost) { _colDragGhost.remove(); _colDragGhost = null; }
+
+    // Remove all drag classes
+    document.querySelectorAll('#table-head th[data-colidx]').forEach(t =>
+      t.classList.remove('col-dragging','col-shift-left','col-shift-right')
+    );
+
+    // If drag was active and target changed, reorder
+    if(_colDragActive && _colDragOver !== null && _colDragOver !== _colDragSrc) {
+      const visCols   = COLUMN_DEFS.filter(c => isColVisible(c.key));
+      const hiddenCols = COLUMN_DEFS.filter(c => !isColVisible(c.key));
+      const moved = visCols.splice(_colDragSrc, 1)[0];
+      visCols.splice(_colDragOver, 0, moved);
+      COLUMN_DEFS.length = 0;
+      visCols.forEach(c   => COLUMN_DEFS.push(c));
+      hiddenCols.forEach(c => COLUMN_DEFS.push(c));
+      renderTable();
+    }
+
+    _colDragSrc    = null;
+    _colDragOver   = null;
+    _colDragActive = false;
+  }
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup',   onMouseUp);
+}
+
+// ════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+renderBatchList();
+renderTemplates();
+renderStats();
+renderFilterChips();
+const savedLogo = LS.get('userLogo');
+if(savedLogo) renderLogo(savedLogo);
+
+window.addEventListener('load', () => {
+  if(batches.length && activeBatchId) {
+    const b = getActiveBatch();
+    if(b) {
+      PAGE_META.lista.sub = `${b.data.length} prospects · ${b.name}`;
+      document.getElementById('list-badge').textContent = b.data.length;
+      document.getElementById('list-badge').style.display = '';
+      switchTab('lista');
+      renderTable();
+      renderStats();
+      updateListTitle();
+    }
+  } else {
+    // First time / no batches — show the guide
+    switchTab('guide');
+  }
+});
+</script>
+</body>
+</html>
